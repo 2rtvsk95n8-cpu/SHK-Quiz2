@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><style>
+html,body{margin:0;background:#101018;-webkit-font-smoothing:antialiased}
+a{color:#7dd3c0}a:hover{color:#a7e8da}
+@keyframes amqPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes amqBar{from{opacity:.6}to{opacity:1}}
+</style></helmet>
+<div style="min-height:100vh;background:radial-gradient(1200px 700px at 50% -10%,#1d2340 0%,#101018 60%);color:#f2f2f5;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 20px 40px;box-sizing:border-box">
+
+<div style="width:100%;max-width:1000px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:34px;height:34px;border-radius:9px;background:oklch(0.72 0.16 55);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1a1408;font-size:17px">A</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px">Anlagenmechaniker Quizapp</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:8px 14px;border-radius:999px">
+<span style="opacity:.55;font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Punkte</span><span>{{ score }}</span>
+</div>
+</div>
+
+<sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;max-width:1000px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:34px 32px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Lernfeld 5 · Kapitel 5.4</div>
+<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Technische Regeln für Trinkwasser-Installationen</h1>
+<p style="margin:0 0 26px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">{{ total }} Fragen aus dem Arbeitsblatt. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1 1 200px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:15px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ start }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Alleine spielen</button>
+<button onClick="{{ openLobby }}" style="flex:0 0 auto;background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:15px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Raum leiten · Teams</button>
+<button onClick="{{ joinAsGuest }}" style="flex:0 0 auto;background:transparent;color:rgba(242,242,245,.7);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Als Spieler beitreten</button>
+</div>
+<div style="margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:rgba(242,242,245,.5)">
+<span>{{ secs }} Sekunden pro Frage</span><span>Max. 1000 Punkte pro Frage</span><span>Bestleistung: {{ best }}</span>
+</div>
+</div>
+<div style="background:#fff;color:#101018;border-radius:20px;padding:24px;text-align:center">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px">Mit dem Handy beitreten</div>
+<div style="font-size:12.5px;color:rgba(16,16,24,.6);margin-bottom:16px">QR-Code scannen — Quiz öffnet sich im Browser</div>
+<canvas ref="{{ qrRef }}" width="220" height="220" style="width:220px;height:220px;max-width:100%;display:block;margin:0 auto;border-radius:10px"></canvas>
+<div style="margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.45;color:rgba(16,16,24,.55);word-break:break-all">{{ url }}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLobby }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start;margin-bottom:22px">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:26px 28px">
+<div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55">Lobby · {{ playerTotal }} Spieler</div>
+<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:{{ connColor }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ connColor }}"></span>{{ connLabel }}</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px">
+<div>
+<div style="font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:4px">Raumcode</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:6px;line-height:1;color:oklch(0.80 0.15 75)">{{ room }}</div>
+</div>
+<div style="margin-left:auto;font-size:13px;color:rgba(242,242,245,.5);max-width:26ch;text-wrap:pretty">Ein gemeinsamer Raum für die ganze Klasse – kein Code nötig, QR-Code scannen genügt.</div>
+</div>
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:0 0 16px;letter-spacing:-.4px">Teams bilden</h2>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1 1 220px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<div style="flex:0 0 auto;font-size:13.5px;color:rgba(242,242,245,.6)">Mein Team: <span style="color:#f2f2f5;font-weight:600">{{ myTeamName }}</span></div>
+</div>
+<div style="margin-top:12px;font-size:13.5px;color:rgba(242,242,245,.6);text-wrap:pretty">{{ lobbyHint }}</div>
+</div>
+<div style="background:#fff;color:#101018;border-radius:18px;padding:20px;text-align:center">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px">Mitspieler einladen</div>
+<canvas ref="{{ lobbyQrRef }}" width="220" height="220" style="width:180px;height:180px;max-width:100%;display:block;margin:0 auto;border-radius:10px"></canvas>
+<div style="margin-top:10px;font-size:12px;color:rgba(16,16,24,.6);line-height:1.4">QR scannen – der Raum {{ room }} wird direkt geöffnet</div>
+<div style="margin-top:8px;font-family:ui-monospace,Menlo,monospace;font-size:9.5px;line-height:1.4;color:rgba(16,16,24,.45);word-break:break-all">{{ roomLink }}</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.55 0.18 25 / .55);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 1</span><span style="font-size:12px;opacity:.55">{{ c0 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t0 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join0 }}" style="background:oklch(0.55 0.18 25);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.12)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.52 0.15 250 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 2</span><span style="font-size:12px;opacity:.55">{{ c1 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t1 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join1 }}" style="background:oklch(0.52 0.15 250);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.12)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.58 0.13 165 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 3</span><span style="font-size:12px;opacity:.55">{{ c2 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t2 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join2 }}" style="background:oklch(0.58 0.13 165);color:#08150f;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.08)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.74 0.15 75 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 4</span><span style="font-size:12px;opacity:.55">{{ c3 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t3 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join3 }}" style="background:oklch(0.74 0.15 75);color:#1a1408;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.06)">Beitreten</button>
+</div>
+</div>
+
+<div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ startTeamGame }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Quiz für alle starten</button>
+</sc-if>
+<sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ resetLobby }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:15px 22px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Lobby leeren</button>
+</sc-if>
+<sc-if value="{{ isGuest }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.75)"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.80 0.15 75)"></span>Warten auf Start durch die Spielleitung</div>
+</sc-if>
+<button onClick="{{ leaveLobby }}" style="background:transparent;color:rgba(242,242,245,.6);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Lobby verlassen</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPlay }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out">
+<sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+<sc-for list="{{ standings }}" as="t" hint-placeholder-count="0"><div style="flex:1 1 180px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">{{ t.label }}</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:oklch(0.80 0.15 75)">{{ t.score }}</span></div></sc-for>
+</div>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;font-size:13px;color:rgba(242,242,245,.6);margin-bottom:12px">
+<span style="white-space:nowrap">Frage {{ qNum }} / {{ total }}</span><span>{{ chapter }}</span>
+</div>
+<div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:22px"><div style="height:100%;background:oklch(0.72 0.16 55);width:{{ progPct }}%;transition:width .3s ease"></div></div>
+
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:30px 30px 26px;margin-bottom:18px">
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;line-height:1.22;margin:0;letter-spacing:-.4px;text-wrap:pretty">{{ question }}</h2>
+<div style="margin-top:22px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:{{ timeColor }};width:{{ timePct }}%;transition:width .12s linear"></div></div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;min-width:34px;text-align:right">{{ timeLeft }}</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+<button onClick="{{ pick0 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.55 0.18 25);border:none;border-radius:16px;padding:22px 22px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring0 }}" style-hover="filter:brightness(1.1)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#fff;clip-path:polygon(50% 0,100% 100%,0 100%)"></span><span style="flex:1;min-width:0">{{ o0 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim0 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick1 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.52 0.15 250);border:none;border-radius:16px;padding:22px 22px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring1 }}" style-hover="filter:brightness(1.12)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#fff;transform:rotate(45deg)"></span><span style="flex:1;min-width:0">{{ o1 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim1 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick2 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.58 0.13 165);border:none;border-radius:16px;padding:22px 22px;color:#08150f;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring2 }}" style-hover="filter:brightness(1.08)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#08150f;border-radius:50%"></span><span style="flex:1;min-width:0">{{ o2 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim2 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick3 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.74 0.15 75);border:none;border-radius:16px;padding:22px 22px;color:#1a1408;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring3 }}" style-hover="filter:brightness(1.06)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#1a1408;border-radius:4px"></span><span style="flex:1;min-width:0">{{ o3 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim3 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+</div>
+
+<sc-if value="{{ revealed }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between;animation:amqPop .2s ease-out">
+<div style="flex:1 1 380px;min-width:0">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:{{ verdictColor }};margin-bottom:6px">{{ verdict }}</div>
+<div style="font-size:14.5px;line-height:1.5;color:rgba(242,242,245,.72);text-wrap:pretty">{{ explain }}</div>
+</div>
+<button onClick="{{ next }}" style="flex:0 0 auto;background:#f2f2f5;color:#101018;border:none;border-radius:12px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#fff">{{ nextLabel }}</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:44px 34px;animation:amqPop .25s ease-out">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:12px">Ergebnis {{ name }}</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:72px;line-height:1;letter-spacing:-2px;color:oklch(0.78 0.16 55)">{{ score }}</div>
+<div style="margin-top:10px;font-size:17px;color:rgba(242,242,245,.8)">{{ correctCount }} von {{ total }} Fragen richtig</div>
+<div style="margin-top:6px;font-size:15px;color:rgba(242,242,245,.55)">{{ grade }}</div>
+<sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:26px;display:flex;flex-direction:column;gap:8px;text-align:left">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55">Teamwertung</div>
+<sc-for list="{{ standings }}" as="t" hint-placeholder-count="0"><div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="min-width:0"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">{{ t.label }}</span><span style="display:block;font-size:12.5px;color:rgba(242,242,245,.5)">{{ t.members }}</span></span><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:oklch(0.80 0.15 75)">{{ t.score }}</span></div></sc-for>
+</div>
+</sc-if>
+<div style="margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+<button onClick="{{ restart }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Nochmal spielen</button>
+<button onClick="{{ toJoin }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:14px 24px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Zur Startseite</button>
+</div>
+</div>
+</sc-if>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#101018"/><rect x="30" y="30" width="40" height="40" rx="10" fill="oklch(0.72 0.16 55)"/><text x="50" y="62" font-family="sans-serif" font-weight="700" font-size="28" text-anchor="middle" fill="#1a1408">A</text></svg></template>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;questionCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;timerSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;shuffleQuestions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Quiz&quot;}}">
+const QUESTIONS = [
+ {c:"1 Normung",q:"Welche Norm enthält die technischen Regeln für Trinkwasser-Installationen?",o:["DIN EN 806","DIN EN 1717","DIN 1988-300","DIN 4109"],a:0,e:"DIN EN 806 – Technische Regeln für Trinkwasser-Installationen."},
+ {c:"1 Normung",q:"In wie viele Teile gliedert sich die DIN EN 806?",o:["Drei Teile","Vier Teile","Fünf Teile","Sechs Teile"],a:2,e:"Fünf Teile: 1 Allgemeines, 2 Planung, 3 Berechnung, 4 Installation, 5 Betrieb und Wartung."},
+ {c:"1 Normung",q:"Welche Norm regelt den Schutz des Trinkwassers und die Erhaltung der Trinkwassergüte?",o:["DIN 1988-500","DIN EN 1717","DIN 4807-5","DIN EN 806-3"],a:1,e:"DIN EN 1717 – Schutz des Trinkwassers und Erhaltung der Trinkwassergüte."},
+ {c:"1 Normung",q:"Was regelt DIN 1988-300?",o:["Schutz des Trinkwassers","Installation","Ermittlung der Rohrdurchmesser","Feuerlöschanlagen"],a:2,e:"DIN 1988-300 regelt die Ermittlung der Rohrdurchmesser. 100 = Schutz des Trinkwassers, 200 = Installation, 500 = Druckerhöhungsanlagen, 600 = Feuerlöschanlagen."},
+ {c:"1 Normung",q:"Welcher Teil der DIN 1988 behandelt Druckerhöhungsanlagen?",o:["DIN 1988-100","DIN 1988-200","DIN 1988-500","DIN 1988-600"],a:2,e:"DIN 1988-500 – Druckerhöhungsanlagen."},
+ {c:"1 Normung",q:"Welche Richtlinie über Trinkwasserhygiene ist zusätzlich zu beachten?",o:["VDI/DVGW 6023","VDI 2035","DVGW W 551","VDI 6022"],a:0,e:"Richtlinie VDI/DVGW 6023. VDI = Verein Deutscher Ingenieure, DVGW = Deutscher Verein des Gas- und Wasserfaches."},
+ {c:"2 Leitungsteile",q:"Wie viele Leitungsteile hat eine Trinkwasseranlage?",o:["Fünf","Sechs","Sieben","Acht"],a:2,e:"Sieben: Anschlussleitung, Wasserzähleranlage, Verbrauchsleitungen, Sammelzuleitungen, Steigleitungen, Stockwerksleitungen, Einzelzuleitungen."},
+ {c:"2 Leitungsteile",q:"Welcher Leitungsteil folgt auf dem Weg des Trinkwassers direkt auf die Wasserzähleranlage?",o:["Steigleitung","Sammelzuleitung","Stockwerksleitung","Einzelzuleitung"],a:1,e:"Versorgungsleitung → Anschlussleitung → Wasserzähleranlage → Sammelzuleitung → Steigleitung → Stockwerksleitung → Einzelzuleitung."},
+ {c:"3 Sinnbilder",q:"Welches Kurzzeichen nach DIN EN 806-1 steht für Trinkwasser, kalt?",o:["PW","PWC","PWH","PWH-C"],a:1,e:"PWC = Trinkwasser, kalt. PW = Trinkwasser allgemein."},
+ {c:"3 Sinnbilder",q:"Welcher deutschen Abkürzung entspricht PWH-C?",o:["TW","TWW","TWZ","PWC"],a:2,e:"PWH-C (Trinkwasser, warm, Zirkulation) entspricht TWZ. PWC entspricht TW, PWH entspricht TWW."},
+ {c:"4 Hausanschluss",q:"Wie wird der Anschluss an die öffentliche Versorgungsleitung hergestellt?",o:["Über Anbohrschellen bei unter Druck stehender Leitung","Nach Entleerung der Versorgungsleitung durch Einschweißen","Über einen Systemtrenner BA","Durch Aufpressen eines Isolierstücks"],a:0,e:"Der Anschluss erfolgt über Anbohrschellen, die Leitung steht dabei unter Druck. Bei einigen Schellen verbleibt der Bohrer als Absperrorgan."},
+ {c:"4 Hausanschluss",q:"Die Anschlussleitung verläuft bis 1 m neben einer Entwässerungsleitung. Was gilt?",o:["Sie muss mindestens 0,5 m tiefer liegen","Sie darf nicht tiefer als die Abwasserleitung liegen","Sie muss überbaut werden","Sie darf nicht absperrbar sein"],a:1,e:"Bei Annäherung bis 1 m darf die Anschlussleitung nicht tiefer als die Abwasserleitung liegen. Sie ist geradlinig, frostfrei und nicht überbaut zu verlegen."},
+ {c:"4 Hausanschluss",q:"Welche Aufgabe hat ein Isolierstück?",o:["Es dämmt die Leitung gegen Wärme","Es unterbricht die elektrische Leitfähigkeit der Rohrleitung","Es hält den Druck konstant","Es verhindert Rückfließen"],a:1,e:"Es unterbricht die elektrische Leitfähigkeit und mindert die Gefahr elektrochemischer Korrosion. Einbau nahe der Absperreinrichtung im Gebäude, grün gekennzeichnet."},
+ {c:"5 Wasserzähleranlage",q:"Welches Bauteil gehört zur Wasserzähleranlage?",o:["Druckminderer","Rückflussverhinderer mit Prüfeinrichtung","Systemtrenner BA","Rohrbelüfter HB"],a:1,e:"Zur Wasserzähleranlage gehören HAE, Wasserzähler, Absperrventil, Rückflussverhinderer mit Prüfeinrichtung und Entleerungsventil."},
+ {c:"5 Wasserzähleranlage",q:"Wie wird beim Trockenläufer die Drehung des Flügelrads auf das Zählwerk übertragen?",o:["Über eine Magnetkupplung","Über eine Zahnradkette im Wasser","Über einen Impulsgeber am Gehäuse","Über eine Membrane"],a:0,e:"Beim Trockenläufer ist das Zählwerk vollkommen vom Wasser getrennt, die Übertragung erfolgt über eine Magnetkupplung. Bevorzugt bei Wasser, das zu Ablagerungen neigt."},
+ {c:"5 Wasserzähleranlage",q:"Welcher Zähler ist eine Bauart der Großwasserzähler?",o:["Einstrahlzähler","Woltmanzähler","Nassläufer-Kleinzähler","Wärmemengenzähler"],a:1,e:"Bauarten: Großflügelrad-Wasserzähler, Ringkolbenzähler, Woltmanzähler, Venturizähler."},
+ {c:"5 Wasserzähleranlage",q:"Wie lange gilt die Eichung von Kalt- und Warmwasserzählern?",o:["Kaltwasser 6 Jahre, Warmwasser 5 Jahre","Kaltwasser 5 Jahre, Warmwasser 6 Jahre","Beide 8 Jahre","Beide 10 Jahre"],a:0,e:"Kaltwasserzähler 6 Jahre, Warmwasserzähler 5 Jahre. Danach ist ein Austauschzähler einzubauen."},
+ {c:"5 Wasserzähleranlage",q:"Welche Aufgabe hat der Wasserzähler-Anschlussbügel?",o:["Er erhöht den Durchfluss","Er ermöglicht spannungsfreien Einbau und erhält die elektrische Schutzmaßnahme","Er mindert Fließgeräusche","Er sichert gegen Rückfließen"],a:1,e:"Er ermöglicht einen spannungsfreien Einbau und verhindert die Unterbrechung einer elektrischen Schutzmaßnahme."},
+ {c:"5 Wasserzähleranlage",q:"Wann liegt geschäftlicher Verkehr vor, der geeichte Zähler verlangt?",o:["Nur beim Wasserversorgungsunternehmen","Immer wenn eine Rechnung erstellt wird, z. B. Vermieter–Mieter","Nur in Industriebetrieben","Nur bei Warmwasser"],a:1,e:"Immer dann, wenn eine Rechnung erstellt wird, z. B. vom WVU oder bei der Abrechnung zwischen Vermieter und Mieter."},
+ {c:"6 Druckminderer",q:"Ab welchem Ruhedruck an der Entnahmestelle ist ein Druckminderer zur Minderung der Fließgeräusche einzubauen?",o:["über 3 bar","über 4 bar","über 5 bar","über 8 bar"],a:2,e:"Wenn der Ruhedruck an der Entnahmestelle 5 bar überschreitet."},
+ {c:"6 Druckminderer",q:"Ein Druckminderer ist nötig, wenn der Ruhedruck welchen Anteil des Ansprechdrucks eines Sicherheitsventils überschreitet?",o:["50 %","65 %","80 %","95 %"],a:2,e:"Bei mehr als 80 % des Ansprechdrucks eines Sicherheitsventils, z. B. am Trinkwassererwärmer."},
+ {c:"6 Druckminderer",q:"Warum besitzt ein Druckminderer ein eingebautes Sieb?",o:["Er ist empfindlich gegen eingeschwemmte Partikel – das Sieb muss regelmäßig gereinigt werden","Es erhöht den Ausgangsdruck","Es dient als Rückflussverhinderer","Es dämpft Wasserschläge dauerhaft wartungsfrei"],a:0,e:"Druckminderer sind empfindlich gegenüber eingeschwemmten Partikeln, deshalb das Sieb. Es muss regelmäßig gewartet bzw. gereinigt werden."},
+ {c:"6 Druckminderer",q:"Welche Fließgeschwindigkeit und welche Norm gelten für den Schallschutz?",o:["2 m/s, DIN 4109","5 m/s, DIN 4109","2 m/s, DIN 1988-600","0,5 m/s, DIN EN 1717"],a:0,e:"2 m/s bezogen auf den Spitzen-Volumenstrom; zu beachten ist DIN 4109 (Schallschutz im Wohnungsbau)."},
+ {c:"7 Trinkwassergüte",q:"Welche der folgenden ist eine der sechs wesentlichen Ursachen für die Gefährdung der Trinkwassergüte?",o:["Zu großer Rohrdurchmesser","Stagnation des Wassers","Gedämmte Kaltwasserleitung","Drehzahlgeregelte Pumpe"],a:1,e:"Rückfließen, unzulässige Verbindung mit anderen Anlagen, äußere Einflüsse, Werk-, Betriebs- und Hilfsstoffe, Stagnation, unsachgemäße Wartung."},
+ {c:"7 Trinkwassergüte",q:"Was bedeutet Stagnation und was wird im häuslichen Bereich empfohlen?",o:["Stillstand des Wassers – Stagnationswasser zunächst auslaufen lassen","Druckstoß – Anlage entleeren","Rückfließen – Systemtrenner einbauen","Erwärmung – Leitung spülen und dämmen"],a:0,e:"Stagnation ist Stillstand des Wassers. Nach längeren Stillstandszeiten kann die Güte beeinträchtigt sein, deshalb Stagnationswasser auslaufen lassen."},
+ {c:"7 Trinkwassergüte",q:"Welche Temperatur darf Kaltwasser 30 s nach vollem Öffnen der Entnahmestelle nicht übersteigen?",o:["20 °C","25 °C","30 °C","35 °C"],a:1,e:"25 °C. Kaltwasserleitungen müssen ausreichenden Abstand zu Wärmequellen halten und gedämmt werden."},
+ {c:"8 Sicherungseinrichtungen",q:"Welche Sicherungsart ist heute Stand der Technik?",o:["Sammelsicherung je Steigleitung","Einzelsicherung jeder Entnahmearmatur","Sicherung nur am Hausanschluss","Sicherung am Wasserzähler genügt"],a:1,e:"Sammelsicherungen werden wegen vieler Nachteile nicht mehr gebaut, die Einzelsicherung ist Stand der Technik."},
+ {c:"8 Sicherungseinrichtungen",q:"Welche Flüssigkeitskategorie beschreibt eine Gesundheitsgefährdung durch Erreger übertragbarer Krankheiten?",o:["Kategorie 2","Kategorie 3","Kategorie 4","Kategorie 5"],a:3,e:"Kategorie 5: Flüssigkeit, die eine Gesundheitsgefährdung durch Erreger übertragbarer Krankheiten bewirken kann."},
+ {c:"8 Sicherungseinrichtungen",q:"Welche Flüssigkeit fällt in Kategorie 2?",o:["Wasser direkt aus der Trinkwasser-Installation","Flüssigkeit ohne Gesundheitsgefährdung, die aber Geschmack, Geruch, Farbe oder Temperatur verändern kann","Flüssigkeit mit giftigen Stoffen","Flüssigkeit mit radioaktiven Substanzen"],a:1,e:"Kategorie 2: keine Gesundheitsgefährdung, für den menschlichen Gebrauch geeignet, kann aber Geschmack, Geruch, Farbe oder Temperatur verändern."},
+ {c:"8 Sicherungseinrichtungen",q:"Welche Sicherungseinrichtung steht hinter dem Kurzzeichen AA?",o:["Ungehinderter freier Auslauf","Kontrollierbarer Rückflussverhinderer","Rohrbelüfter für Schlauchanschlüsse","Rohrtrenner mit kontrollierbarer Mitteldruckzone"],a:0,e:"AA = ungehinderter freier Auslauf. EA = kontrollierbarer Rückflussverhinderer, HB = Rohrbelüfter für Schlauchanschlüsse, BA = Systemtrenner."},
+ {c:"8 Sicherungseinrichtungen",q:"Wofür steht das Kurzzeichen BA?",o:["Rohrunterbrecher mit beweglichen Teilen","Rohrtrenner, nicht durchflussgesteuert","Rohrtrenner (Systemtrenner) mit kontrollierbarer Mitteldruckzone","Ungehinderter freier Auslauf"],a:2,e:"BA = Rohrtrenner (Systemtrenner) mit kontrollierbarer Mitteldruckzone. GA = Rohrtrenner, nicht durchflussgesteuert, DB = Rohrunterbrecher mit beweglichen Teilen."},
+ {c:"8 Sicherungseinrichtungen",q:"Welcher Mindestabstand h gilt beim freien Auslauf AA?",o:["Mindestens 1 × di, nicht unter 10 mm","Mindestens 2 × di, nicht unter 20 mm","Mindestens 150 mm","Mindestens 250 mm"],a:1,e:"h zwischen höchstmöglichem Wasserspiegel und Zulauföffnung: mindestens 2 × di, darf 20 mm nicht unterschreiten."},
+ {c:"8 Sicherungseinrichtungen",q:"Was darf hinter einem Rohrunterbrecher nicht eingebaut werden?",o:["Eine Absperrarmatur","Ein Rückflussverhinderer","Ein Filter","Ein Druckminderer"],a:0,e:"Hinter dem Rohrunterbrecher darf keine Absperrarmatur sitzen, sonst tritt Wasser aus den Belüftungsöffnungen aus."},
+ {c:"8 Sicherungseinrichtungen",q:"Wie hoch muss ein Rohrunterbrecher über dem höchstmöglichen Wasserspiegel eingebaut werden?",o:["Mindestens 20 mm","Mindestens 150 mm","Mindestens 250 mm","Mindestens 400 mm"],a:1,e:"Mindestens 150 mm über dem höchstmöglichen Wasserspiegel – beim WC-Druckspüler mindestens 400 mm über der Oberkante des Klosettbeckens."},
+ {c:"8 Sicherungseinrichtungen",q:"Aus welchen Bauteilen besteht die Sicherungskombination HD am Gartenventil?",o:["Rohrbelüfter HB und Rückflussverhinderer EB","Rohrtrenner CA und Filter","Systemtrenner BA und Druckminderer","Freier Auslauf AA und Absperrventil"],a:0,e:"Kombination aus Rohrbelüfter HB und Rückflussverhinderer EB, mindestens 250 mm über dem höchstmöglichen Wasserspiegel."},
+ {c:"8 Sicherungseinrichtungen",q:"Bei welchem Druckabfall trennt ein Rohrtrenner CA die Rohrleitung?",o:["Bei ca. 5 % Abnahme von p1 gegenüber p2","Bei ca. 10 % Abnahme von p1 gegenüber p2","Bei 140 mbar Differenz","Bei 1 bar Differenz"],a:1,e:"Der Rohrtrenner CA trennt, wenn der Zulaufdruck p1 um ca. 10 % gegenüber p2 abnimmt; die Mitteldruckzone wird belüftet."},
+ {c:"8 Sicherungseinrichtungen",q:"Bei welcher Druckdifferenz löst die Trennung eines Systemtrenners BA aus?",o:["14 mbar","140 mbar","1,4 bar","10 % des Vordrucks"],a:1,e:"Systemtrenner BA haben drei kontrollierbare Druckzonen; Trennung bei 140 mbar zwischen Vor- und Mitteldruckkammer."},
+ {c:"8 Sicherungseinrichtungen",q:"Warum ist ein Füllschlauch mit Rückflussverhinderer zur Heizungsanlage nicht mehr erlaubt?",o:["Er bietet nicht die nach DIN EN 1717 geforderte Sicherheit – nötig ist ein Rohrtrenner","Er ist zu lang","Er verursacht Fließgeräusche","Er ist nicht eichfähig"],a:0,e:"Die Verbindung muss über einen Rohrtrenner erfolgen, dabei ist zwischen Heizungswasser mit und ohne Inhibitoren zu unterscheiden."},
+ {c:"9 Spülen und Prüfen",q:"Welche Regel gilt beim Spülen der Trinkwasser-Installation?",o:["Fließgeschwindigkeit mind. 2 m/s, Abschnitte max. 100 m","Fließgeschwindigkeit max. 0,5 m/s, Abschnitte max. 300 m","Spülen nur von oben nach unten in einem Zug","Spülen erst nach der Übergabe an den Betreiber"],a:0,e:"Mind. 2 m/s, abschnittsweise (max. 100 m), von unten nach oben und von der nächstgelegenen zur entferntesten Steigleitung."},
+ {c:"9 Spülen und Prüfen",q:"Welche Spüldauer ist vorgeschrieben?",o:["Mind. 5 s je Meter, 30 s je Entnahmestelle","Mind. 15 s je Meter, mind. 2 Minuten je Entnahmestelle","Mind. 1 Minute je Meter, 10 Minuten je Entnahmestelle","Nur bis das Wasser klar ist"],a:1,e:"Mindestens 15 s je Meter Leitungslänge und mindestens 2 Minuten je Entnahmestelle."},
+ {c:"9 Spülen und Prüfen",q:"Wie hoch ist der Prüfdruck bei Metall- und Verbundrohren und wie lange wird geprüft?",o:["5 bar über Betriebsdruck, i. d. R. 15 bar, 10 Minuten","1 bar über Betriebsdruck, 30 Minuten","150 mbar, 10 Minuten","3 bar, 2 Stunden"],a:0,e:"5 bar über dem zulässigen Betriebsdruck, in der Regel 15 bar; Prüfzeit nach Temperaturausgleich 10 Minuten."},
+ {c:"9 Spülen und Prüfen",q:"Welche Wartezeit gilt bei mehr als 10 K Differenz zwischen Umgebungs- und Füllwassertemperatur?",o:["10 Minuten","20 Minuten","30 Minuten","60 Minuten"],a:2,e:"Bei Temperaturdifferenzen größer 10 K ist eine Wartezeit von 30 Minuten einzuhalten."},
+ {c:"9 Spülen und Prüfen",q:"Mit welchem Druck wird die Dichtheitsprüfung mit Luft durchgeführt?",o:["150 mbar","1 bar","3 bar","15 bar"],a:0,e:"Dichtheitsprüfung mit 150 mbar. Belastungsprüfung aus Sicherheitsgründen max. 1 bar bei > DN 50 bzw. 3 bar bei ≤ DN 50."},
+ {c:"9 Spülen und Prüfen",q:"Was ist dem Betreiber bei der Übergabe zu geben?",o:["Nur die Rechnung","Wartungs- und Bedienungsanleitungen samt Einweisung","Eine Kopie der DIN EN 806","Das Spülprotokoll des WVU"],a:1,e:"Wartungs- und Bedienungsanleitungen übergeben, Betreiber einweisen und auf Sicherungs- und Absperrarmaturen hinweisen. Empfohlen: Inbetriebnahme- und Einweisungsprotokoll sowie Wartungsvertrag."},
+ {c:"10 Druckerhöhung",q:"Wann ist eine Druckerhöhungsanlage erforderlich und wer genehmigt sie?",o:["Wenn der Versorgungsdruck für höher liegende Stockwerke nicht ausreicht – Genehmigung durch das WVU","Bei jedem Neubau – Genehmigung durch das Bauamt","Wenn der Ruhedruck über 5 bar liegt – Genehmigung durch den Installateur","Bei Feuerlöschanlagen – Genehmigung durch die Feuerwehr"],a:0,e:"Wenn der Druck im Versorgungsnetz nicht ausreicht, auch höher liegende Stockwerke zu versorgen. Die Genehmigung erteilt das zuständige WVU."},
+ {c:"10 Druckerhöhung",q:"Wie hoch soll der Mindestfließdruck sein, und welcher Fließdruck soll nicht überschritten werden?",o:["0,5 bar / max. 3 bar","1,0 bis 1,2 bar / max. 5 bar","2,0 bar / max. 8 bar","1,5 bar / max. 10 bar"],a:1,e:"Mindestfließdruck 1,0 bis 1,2 bar; wegen des Schallschutzes soll der Fließdruck an den Entnahmestellen 5 bar nicht überschreiten."},
+ {c:"10 Druckerhöhung",q:"Welche Pumpenbauart schreibt DIN 1988-500 vor?",o:["Einstufige Kolbenpumpen","Mehrstufige Kreiselpumpen mit Drehzahlregelung","Handpumpen als Notversorgung","Membranpumpen mit Druckbehälter"],a:1,e:"Mehrstufige Kreiselpumpen, stufig oder stufenlos drehzahlgeregelt nach Volumenstrom und Versorgungsdruck."},
+ {c:"10 Druckerhöhung",q:"Höchste Entnahmestelle 32 m, Mindestversorgungsdruck 4 bar, Druckverluste 1,2 bar, Mindestdruck an der Entnahmestelle 1,0 bar. Bis zu welcher Höhe ist ohne Druckerhöhung zu versorgen?",o:["12 m","18 m","24 m","32 m"],a:1,e:"pe1 = 4 − 1,0 − 1,2 = 1,8 bar, das entspricht 18 m Höhe."},
+ {c:"10 Druckerhöhung",q:"Wie groß ist im gleichen Beispiel die erforderliche Druckerhöhung für Druckzone 2?",o:["1,0 bar","1,4 bar","3,2 bar","5,4 bar"],a:1,e:"pe2 = 1,0 + 1,2 + 3,2 = 5,4 bar; Δp = 5,4 − 4 = 1,4 bar."},
+ {c:"10 Druckerhöhung",q:"Warum ist bei DEA nach DIN 1988-500 meist kein Druckbehälter erforderlich?",o:["Weil drehzahlgeregelte Pumpen sich automatisch anpassen","Weil das WVU den Druck konstant hält","Weil Druckbehälter verboten sind","Weil der Ruhedruck immer ausreicht"],a:0,e:"Drehzahlgeregelte Pumpen passen sich Volumenstrom und Druck automatisch an. Kleine Behälter auf der Druckseite verhindern ein Anlaufen bei geringer Entnahme und müssen DIN 4807-5 entsprechen."},
+ {c:"10 Druckerhöhung",q:"Welche Anforderungen gelten für den Aufstellraum einer DEA?",o:["Frostfrei, abschließbar, nicht anderweitig genutzt, zugänglich","Beliebiger Kellerraum mit Bodenablauf","Beheizt auf mindestens 20 °C","Nur im Dachgeschoss"],a:0,e:"Frostfreier, abschließbarer und nicht anderweitig genutzter Raum; die Anlage muss für Wartung und Reparatur zugänglich sein."}
+];
+
+const LKEY = 'amq-lobby-v1';
+const TOPIC = 'amq_tw54_quiz';
+const ROOM = 'TW54';
+
+const BROKERS = ['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+const TEAM_NAMES = ['Team 1','Team 2','Team 3','Team 4'];
+const MAX_PER_TEAM = 4;
+function lread(key){ try { return JSON.parse(localStorage.getItem(key || LKEY) || '{}') || {}; } catch(e){ return {}; } }
+function lwrite(next, key){ try { localStorage.setItem(key || LKEY, JSON.stringify(next)); } catch(e){} }
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+class Component extends DCLogic {
+  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off'};
+  qrRef = React.createRef();
+  lobbyQrRef = React.createRef();
+  netPlayers = {};
+  netGame = null;
+
+  componentDidMount(){
+    let best = 0;
+    try { best = parseInt(localStorage.getItem('amq-best')||'0',10)||0; } catch(e){}
+    const url = (typeof location!=='undefined') ? location.href.split('#')[0] : '';
+    const myId = 'p' + Math.random().toString(36).slice(2,9);
+    const hash = (typeof location!=='undefined') ? location.hash : '';
+    const auto = /(^|[#&])join($|[&=])/i.test(hash||'') || /r=/i.test(hash||'');
+    this.setState({best, url, myId}, ()=>{
+      this.drawQr();
+      if(auto) this.enterRoom(ROOM, false);
+    });
+    try { this._ch = new BroadcastChannel('amq-lobby'); this._ch.onmessage = ()=>this.syncLobby(); } catch(e){}
+    this._onStorage = e => { if(!e || e.key===LKEY) this.syncLobby(); };
+    window.addEventListener('storage', this._onStorage);
+    this._poll = setInterval(()=>{ this.heartbeat(); this.syncLobby(); }, 1800);
+  }
+  componentDidUpdate(){ this.drawQr(); }
+
+  /* ---- Transport: öffentlicher MQTT-Broker, Fallback = lokaler Speicher ---- */
+  topic(sub){ return TOPIC + '/' + this.state.room + (sub ? '/' + sub : ''); }
+  lk(){ return this.state.room ? LKEY + ':' + this.state.room : LKEY; }
+  async fbConfig(){
+    if(this._cfg !== undefined) return this._cfg;
+    let c = (typeof window !== 'undefined' && window.AMQ_FIREBASE) ? window.AMQ_FIREBASE : null;
+    if(!c){
+      try {
+        const m = await import('./firebase-config.js');
+        c = m.firebaseConfig || m.default || m.FIREBASE || null;
+      } catch(e){ c = null; }
+    }
+    this._cfg = (c && c.databaseURL) ? c : null;
+    return this._cfg;
+  }
+  loadScript(src){
+    return new Promise(res=>{
+      if(document.querySelector('script[data-amq="'+src+'"]')) return res(true);
+      const s = document.createElement('script');
+      s.src = src; s.dataset.amq = src;
+      s.onload = ()=>res(true); s.onerror = ()=>res(false);
+      document.head.appendChild(s);
+    });
+  }
+  async connectFirebase(room){
+    try {
+      const cfg = await this.fbConfig();
+      if(!cfg) return false;
+      if(!window.firebase || !window.firebase.database){
+        const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+        const ok = await Promise.all([
+          this.loadScript(base + 'firebase-app-compat.js'),
+          this.loadScript(base + 'firebase-auth-compat.js'),
+          this.loadScript(base + 'firebase-database-compat.js')
+        ]);
+        if(ok.some(x=>!x) || !window.firebase) return false;
+      }
+      if(!window.firebase.apps.length) window.firebase.initializeApp(cfg);
+      try { await window.firebase.auth().signInAnonymously(); } catch(e){ return false; }
+      const uid = (window.firebase.auth().currentUser||{}).uid;
+      if(uid) this.setState({myId: uid});
+      const db = window.firebase.database();
+      const ref = db.ref('rooms/' + room);
+      const meId = uid || this.state.myId;
+      this._fb = {ref, me: ref.child('players/' + meId)};
+      try { await this._fb.me.onDisconnect().remove(); } catch(e){}
+      if(this.state.isHost){ try { await ref.child('game').remove(); } catch(e){} }
+      ref.on('value', snap=>{
+        const v = snap.val() || {};
+        this.netPlayers = {};
+        Object.keys(v.players||{}).forEach(id=>{ this.netPlayers[id] = Object.assign({id}, v.players[id]); });
+        const rst = v.reset && v.reset.at;
+        if(rst && rst > (this._resetAt||0)){ this.applyReset(rst); return; }
+        this.netGame = (v.game && (v.game.at||0) >= (this._resetAt||0)) ? v.game : null;
+        this.syncLobby();
+      }, ()=>{ this.setState({conn:'local'}); });
+      db.ref('.info/connected').on('value', s=>{
+        this.setState({conn: s.val() ? 'online' : 'connecting'});
+        if(s.val()) this.publishMe();
+      });
+      return true;
+    } catch(e){ return false; }
+  }
+  applyReset(at){
+    this._resetAt = at; this._lobbyAt = at;
+    this.netPlayers = {}; this.netGame = null;
+    const st = lread(this.lk()); if(st.players) delete st.players[this.state.myId];
+    st.game = null; lwrite(st, this.lk()); this.ping();
+    clearInterval(this._iv);
+    this.setState({players:{}, seed:0, score:0, correct:0, picked:null, screen:'lobby'});
+  }
+  async connect(room){
+    this.closeNet();
+    this.netPlayers = {}; this.netGame = null;
+    this.setState({conn:'connecting'});
+    if(await this.connectFirebase(room)) return;
+    if(!window.mqtt){ this.setState({conn:'local'}); return; }
+    this.setState({conn:'connecting'});
+    const attempt = i => {
+      if(i >= BROKERS.length){ this.setState({conn:'local'}); return; }
+      let live = false, c;
+      try {
+        c = window.mqtt.connect(BROKERS[i], {clientId:'amq_'+this.state.myId+'_'+Math.random().toString(36).slice(2,6), clean:true, keepalive:30, connectTimeout:6000, reconnectPeriod:0});
+      } catch(e){ attempt(i+1); return; }
+      c.on('connect', ()=>{
+        live = true; this._net = c;
+        this.setState({conn:'online'});
+        c.subscribe(TOPIC + '/' + room + '/#', {qos:0});
+        this.publishMe();
+      });
+      c.on('message', (t, payload)=>{
+        let d = null; try { d = JSON.parse(payload.toString()); } catch(e){ return; }
+        if(/\/reset$/.test(t)){ if(d && d.at > (this._resetAt||0)) this.applyReset(d.at); return; }
+        if(/\/game$/.test(t)){ if(d && (d.at||0) >= (this._resetAt||0)) this.netGame = d; }
+        else if(d && d.id){ if((d.ts||0) < (this._resetAt||0)) return; this.netPlayers[d.id] = d; }
+        this.syncLobby();
+      });
+      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); });
+      c.on('close', ()=>{ if(!live) attempt(i+1); else if(this._net===c) this.setState({conn:'local'}); });
+    };
+    attempt(0);
+  }
+  closeNet(){
+    try { if(this._net){ this._net.end(true); this._net = null; } } catch(e){}
+    try { if(this._fb){ this._fb.ref.off(); this._fb.me.remove(); this._fb = null; } } catch(e){}
+  }
+  pub(sub, data){
+    try { if(this._fb) this._fb.ref.child(sub.indexOf('p/')===0 ? 'players/'+sub.slice(2) : sub).set(data); } catch(e){}
+    try { if(this._net) this._net.publish(this.topic(sub), JSON.stringify(data), {qos:0}); } catch(e){}
+  }
+  publishMe(){
+    const me = (lread(this.lk()).players||{})[this.state.myId];
+    if(!me) return;
+    const rec = Object.assign({id:this.state.myId}, me, {score:this.state.score||0, ts:Date.now()});
+    this.netPlayers[this.state.myId] = rec;
+    this.pub('p/'+this.state.myId, rec);
+  }
+
+  ping(){ try { if(this._ch) this._ch.postMessage(1); } catch(e){} }
+  mutate(fn){ const st = lread(this.lk()); const next = fn(st) || st; lwrite(next, this.lk()); this.ping(); this.syncLobby(); }
+  heartbeat(){
+    if(this.state.mode!=='team' || !this.state.myId) return;
+    const me = (lread(this.lk()).players||{})[this.state.myId];
+    if(!me) return;
+    this.mutate(st=>{ st.players = st.players||{}; if(st.players[this.state.myId]){ st.players[this.state.myId].ts = Date.now(); st.players[this.state.myId].score = this.state.score; } return st; });
+    this.publishMe();
+  }
+  syncLobby(){
+    const st = lread(this.lk()); const now = Date.now();
+    const merged = {};
+    Object.keys(this.netPlayers).forEach(id=>{ merged[id] = this.netPlayers[id]; });
+    Object.keys(st.players||{}).forEach(id=>{ merged[id] = Object.assign({}, merged[id], st.players[id], {id}); });
+    const players = {};
+    Object.keys(merged).forEach(id=>{ const p = merged[id]; if(p && p.team!=null && now - (p.ts||0) < 12000) players[id] = p; });
+    this.setState({players});
+    const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
+    const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
+    if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
+      this.beginGame(game.seed);
+    }
+  }
+
+  enterRoom(room, isHost){
+    this._resetAt = 0;
+    this._lobbyAt = Date.now();
+    this.netGame = null;
+    if(isHost) lwrite({players:{}}, LKEY + ':' + room);
+    else { const st = lread(LKEY + ':' + room); st.game = null; lwrite(st, LKEY + ':' + room); }
+    this.setState({mode:'team', screen:'lobby', room, roomInput:room, score:0, correct:0, seed:0, players:{}, isHost:!!isHost}, ()=>this.connect(room));
+  }
+  joinAsGuest = ()=>{ this.enterRoom(ROOM, false); };
+  backToLobby = ()=>{
+    this._lobbyAt = Date.now();
+    this.netGame = null;
+    const st = lread(this.lk()); st.game = null; lwrite(st, this.lk());
+    if(this.state.isHost){ try { if(this._fb) this._fb.ref.child('game').remove(); } catch(e){} }
+    this.setState({screen:'lobby', seed:0, score:0, correct:0, picked:null});
+  };
+  joinTeam = t => ()=>{
+    const name = (this.state.name||'').trim();
+    if(!name) return;
+    const p = this.state.players || {};
+    const inTeam = Object.keys(p).filter(id=>p[id].team===t && id!==this.state.myId).length;
+    if(inTeam >= MAX_PER_TEAM) return;
+    this.mutate(s=>{ s.players = s.players||{}; s.players[this.state.myId] = {name, team:t, score:this.state.score||0, ts:Date.now()}; return s; });
+    this.publishMe();
+  };
+  leaveLobby = ()=>{
+    this.pub('p/'+this.state.myId, {id:this.state.myId, team:null, ts:0});
+    this.mutate(s=>{ if(s.players) delete s.players[this.state.myId]; return s; });
+    this.closeNet();
+    clearInterval(this._iv);
+    this.netPlayers = {}; this.netGame = null;
+    this.setState({screen:'join', mode:'solo', seed:0, room:'', conn:'off', players:{}});
+  };
+  openLobby = ()=>{ this.enterRoom(ROOM, true); };
+  resetLobby = ()=>{
+    if(!this.state.isHost) return;
+    const at = Date.now();
+    this.pub('reset', {at});
+    this.applyReset(at);
+  };
+  startTeamGame = ()=>{
+    if(this.state.mode==='team' && !this.state.isHost) return;
+    const seed = Date.now() % 2147483647;
+    const game = {seed, at:Date.now()};
+    this.netGame = game;
+    this.mutate(s=>{ s.game = game; return s; });
+    this.pub('game', game);
+    this.beginGame(seed);
+  };
+  beginGame(seed){
+    this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null}, ()=>{ this.tick(); this.publishMe(); });
+    this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
+  }
+  drawQr(){
+    const pairs = [[this.qrRef.current, this.state.url], [this.lobbyQrRef.current, this.roomLink()]];
+    pairs.forEach(([c, value])=>{
+      if(!c || !window.QRious || !value || c.dataset.done === value) return;
+      c.dataset.done = value;
+      try { new window.QRious({element:c, value, size:220, padding:6, background:'#ffffff', foreground:'#101018', level:'M'}); } catch(e){}
+    });
+  }
+  roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
+  componentWillUnmount(){
+    clearInterval(this._iv); clearInterval(this._poll); this.closeNet();
+    window.removeEventListener('storage', this._onStorage);
+    try { if(this._ch) this._ch.close(); } catch(e){}
+  }
+
+  get secs(){ return Math.round(this.props.timerSeconds ?? 25); }
+  get count(){ return Math.min(Math.round(this.props.questionCount ?? 20), QUESTIONS.length); }
+
+  shuffle(a, rnd){ const r=a.slice(); const f = rnd || Math.random; for(let i=r.length-1;i>0;i--){const j=Math.floor(f()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
+
+  buildDeck(seed){
+    const rnd = seed ? mulberry32(seed) : null;
+    const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(QUESTIONS, rnd) : QUESTIONS.slice();
+    return picked.slice(0, this.count).map(item=>{
+      const idxs = this.shuffle([0,1,2,3], rnd);
+      return {c:item.c, q:item.q, e:item.e, o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
+    });
+  }
+
+  start = ()=>{
+    this.setState({mode:'solo', screen:'play', deck:this.buildDeck(), idx:0, score:0, streak:0, correct:0, picked:null}, this.tick);
+  };
+  tick = ()=>{
+    clearInterval(this._iv);
+    this._deadline = Date.now() + this.secs*1000;
+    this.setState({t:this.secs*10, picked:null});
+    this._iv = setInterval(()=>{
+      if(this.state.picked !== null){ clearInterval(this._iv); return; }
+      const left = Math.max(0, this._deadline - Date.now());
+      if(left <= 0){ clearInterval(this._iv); this.setState({t:0, picked:-1, streak:0}); }
+      else this.setState({t: Math.ceil(left/100)});
+    },100);
+  };
+  answer = i => ()=>{
+    if(this.state.picked!==null) return;
+    clearInterval(this._iv);
+    const q = this.state.deck[this.state.idx];
+    const ok = i===q.a;
+    this.setState(s=>{
+      const streak = ok ? s.streak+1 : 0;
+      const pts = ok ? Math.round(600 + 400*(s.t/(this.secs*10))) + Math.min(streak-1,5)*50 : 0;
+      return {picked:i, streak, score:s.score+pts, correct:s.correct+(ok?1:0), gain:pts};
+    });
+    if(this.state.mode==='team') setTimeout(()=>this.heartbeat(), 30);
+  };
+  next = ()=>{
+    if(this.state.idx+1 >= this.state.deck.length){
+      const best = Math.max(this.state.best, this.state.score);
+      try { localStorage.setItem('amq-best', String(best)); } catch(e){}
+      if(this.state.mode==='team') this.heartbeat();
+      this.setState({screen:'done', best});
+    } else {
+      this.setState(s=>({idx:s.idx+1}), this.tick);
+    }
+  };
+
+  renderVals(){
+    const s = this.state, q = s.deck[s.idx];
+    const revealed = s.picked !== null;
+    const ok = revealed && s.picked === (q && q.a);
+    const total = this.count;
+    const ringOf = i => (revealed && q && i===q.a) ? '0 0 0 4px #f2f2f5' : 'none';
+    const dimOf = i => (revealed && q && i!==q.a && i!==s.picked) ? 0.55 : 0;
+    const grade = s.correct/total >= 0.9 ? 'Sehr gut – prüfungsreif.' : s.correct/total >= 0.7 ? 'Gut. Ein paar Regelwerte noch einmal ansehen.' : s.correct/total >= 0.5 ? 'Solide Basis, Kapitel 5.4 nochmal durcharbeiten.' : 'Noch viel Luft – Musterlösung wiederholen.';
+    const ids = Object.keys(s.players||{});
+    const teamOf = t => ids.filter(id=>s.players[id].team===t).map(id=>({name:s.players[id].name, score:s.players[id].score||0, me: id===s.myId}));
+    const T = [0,1,2,3].map(t=>{ const m = teamOf(t); return {name:TEAM_NAMES[t], members:m, score:m.reduce((a,b)=>a+b.score,0), count:m.length}; });
+    const standings = T.filter(t=>t.count>0).slice().sort((a,b)=>b.score-a.score).map((t,i)=>({label:(i+1)+'. '+t.name, score:t.score, members:t.members.map(m=>m.name).join(', ')}));
+    const mine = (s.players||{})[s.myId];
+    const nameOk = !!(s.name||'').trim();
+    return {
+      isJoin: s.screen==='join', isPlay: s.screen==='play', isDone: s.screen==='done',
+      isLobby: s.screen==='lobby', isTeam: s.mode==='team', openLobby: this.openLobby,
+      leaveLobby: this.leaveLobby, resetLobby: this.resetLobby, startTeamGame: this.startTeamGame,
+      lobbyQrRef: this.lobbyQrRef, nameOk, playerTotal: ids.length,
+      room: s.room, roomLink: this.roomLink(), joinAsGuest: this.joinAsGuest,
+      connLabel: s.conn==='online' ? 'Online verbunden' : s.conn==='connecting' ? 'Verbinde…' : 'Offline – nur dieses Gerät',
+      connColor: s.conn==='online' ? 'oklch(0.80 0.15 160)' : s.conn==='connecting' ? 'oklch(0.80 0.15 75)' : 'oklch(0.72 0.17 30)',
+      myTeamName: mine && mine.team!=null ? TEAM_NAMES[mine.team] : '—',
+      canStart: ids.length>0 && !!mine && mine.team!=null,
+      isHost: !!s.isHost, isGuest: !s.isHost,
+      lobbyHint: !nameOk ? 'Zuerst Namen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
+      t0: T[0].members, t1: T[1].members, t2: T[2].members, t3: T[3].members,
+      c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
+      join0: this.joinTeam(0), join1: this.joinTeam(1), join2: this.joinTeam(2), join3: this.joinTeam(3),
+      standings,
+      score: s.score, total, secs: this.secs, best: s.best, url: s.url, qrRef: this.qrRef,
+      name: s.name, onName: e=>this.setState({name:e.target.value}),
+      start: this.start, restart: s.mode==='team' ? this.backToLobby : this.start,
+      toJoin: s.mode==='team' ? this.leaveLobby : ()=>this.setState({screen:'join'}),
+      qNum: s.idx+1, progPct: Math.round(((s.idx + (revealed?1:0))/total)*100),
+      chapter: q ? q.c : '', question: q ? q.q : '',
+      o0: q?q.o[0]:'', o1: q?q.o[1]:'', o2: q?q.o[2]:'', o3: q?q.o[3]:'',
+      pick0: this.answer(0), pick1: this.answer(1), pick2: this.answer(2), pick3: this.answer(3),
+      ring0: ringOf(0), ring1: ringOf(1), ring2: ringOf(2), ring3: ringOf(3),
+      dim0: dimOf(0), dim1: dimOf(1), dim2: dimOf(2), dim3: dimOf(3),
+      timeLeft: Math.ceil(s.t/10), timePct: Math.round((s.t/(this.secs*10))*100),
+      timeColor: s.t <= this.secs*3 ? 'oklch(0.62 0.20 25)' : 'oklch(0.78 0.16 55)',
+      revealed,
+      verdict: s.picked===-1 ? 'Zeit abgelaufen' : ok ? ('Richtig · +' + (s.gain||0) + ' Punkte') : 'Leider falsch',
+      verdictColor: ok ? 'oklch(0.80 0.15 160)' : 'oklch(0.72 0.17 30)',
+      explain: q ? q.e : '',
+      nextLabel: s.idx+1 >= total ? 'Ergebnis' : 'Weiter',
+      next: this.next, correctCount: s.correct, grade
+    };
+  }
+}
+</script>
+</body>
+</html>
