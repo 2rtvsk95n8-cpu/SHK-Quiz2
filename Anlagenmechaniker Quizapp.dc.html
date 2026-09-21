@@ -149,6 +149,18 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <sc-if value="{{ isGuest }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.75)"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.80 0.15 75)"></span>Warten auf Start durch die Spielleitung</div>
 </sc-if>
+<sc-if value="{{ gameRunning }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:oklch(0.55 0.18 25 / .18);border:1px solid oklch(0.62 0.20 25 / .5);border-radius:12px;padding:15px 20px;font-size:14.5px;color:#f2f2f5"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.72 0.17 30)"></span>Eine Runde läuft bereits – du wirst bei der nächsten Runde mitgenommen.</div>
+</sc-if>
+<sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:oklch(0.55 0.18 25 / .18);border:1px solid oklch(0.62 0.20 25 / .5);border-radius:12px;padding:13px 18px;font-size:14.5px;color:#f2f2f5">
+<span style="flex:1 1 260px;min-width:0;text-wrap:pretty">Keine Verbindung zu den Mitspielern – dieses Gerät spielt allein.</span>
+<button onClick="{{ reconnect }}" style="flex:0 0 auto;background:#f2f2f5;color:#101018;border:none;border-radius:10px;padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:#fff">Erneut verbinden</button>
+</div>
+</sc-if>
+<sc-if value="{{ dataLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.7)">Fragen werden geladen …</div>
+</sc-if>
 <button onClick="{{ leaveLobby }}" style="background:transparent;color:rgba(242,242,245,.6);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Lobby verlassen</button>
 </div>
 </div>
@@ -354,7 +366,8 @@ class Component extends DCLogic {
   }
   applyReset(at){
     this._resetAt = at; this._lobbyAt = at;
-    this.netPlayers = {}; this.netGame = null;
+    this.netPlayers = {}; this.netGame = null; this._anyGame = null;
+    if(this.state.isHost) this.clearRetained('game');
     const st = lread(this.lk()); if(st.players) delete st.players[this.state.myId];
     st.game = null; lwrite(st, this.lk()); this.ping();
     clearInterval(this._iv);
@@ -377,27 +390,51 @@ class Component extends DCLogic {
         live = true; this._net = c;
         this.setState({conn:'online'});
         c.subscribe(TOPIC + '/' + room + '/#', {qos:0});
+        if(this.state.isHost){
+          this._anyGame = null; this.netGame = null;
+          this.clearRetained('game');
+          this.setState({gameRunning:false});
+        }
         this.publishMe();
       });
       c.on('message', (t, payload)=>{
-        let d = null; try { d = JSON.parse(payload.toString()); } catch(e){ return; }
+          const raw = payload.toString();
+        if(!raw){ if(/\/game$/.test(t)){ this.netGame = null; this._anyGame = null; this.syncLobby(); } return; }
+        let d = null; try { d = JSON.parse(raw); } catch(e){ return; }
         if(/\/reset$/.test(t)){ if(d && d.at > (this._resetAt||0)) this.applyReset(d.at); return; }
-        if(/\/game$/.test(t)){ if(d && (d.at||0) >= (this._resetAt||0)) this.netGame = d; }
+        if(/\/game$/.test(t)){ if(d && (d.at||0) >= (this._resetAt||0)){ this.netGame = d; this._anyGame = d; } }
         else if(d && d.id){ if((d.ts||0) < (this._resetAt||0)) return; this.netPlayers[d.id] = d; }
         this.syncLobby();
       });
-      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); });
-      c.on('close', ()=>{ if(!live) attempt(i+1); else if(this._net===c) this.setState({conn:'local'}); });
+      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); else if(this._net===c){ this._net = null; this.setState({conn:'connecting'}); } });
+      c.on('close', ()=>{
+        if(!live) attempt(i+1);
+        else if(this._net===c){ this._net = null; this.setState({conn:'connecting'}); }
+      });
     };
+    this._attempt = attempt;
     attempt(0);
+    clearInterval(this._retryNet);
+    this._retryNet = setInterval(()=>{
+      const s = this.state;
+      if(s.mode!=='team' || (s.screen!=='lobby' && s.screen!=='play' && s.screen!=='done')){ return; }
+      if(s.conn==='online' && this._net) return;
+      if(this._fb) return;
+      this._attempt && this._attempt(0);
+    }, 8000);
   }
+  reconnect = ()=>{ this.setState({conn:'connecting'}, ()=>this.connect(this.state.room)); };
   closeNet(){
+    clearInterval(this._retryNet);
     try { if(this._net){ this._net.end(true); this._net = null; } } catch(e){}
     try { if(this._fb){ this._fb.ref.off(); this._fb.me.remove(); this._fb = null; } } catch(e){}
   }
   pub(sub, data){
     try { if(this._fb) this._fb.ref.child(sub.indexOf('p/')===0 ? 'players/'+sub.slice(2) : sub).set(data); } catch(e){}
-    try { if(this._net) this._net.publish(this.topic(sub), JSON.stringify(data), {qos:0}); } catch(e){}
+    try { if(this._net) this._net.publish(this.topic(sub), JSON.stringify(data), {qos:0, retain:true}); } catch(e){}
+  }
+  clearRetained(sub){
+    try { if(this._net) this._net.publish(this.topic(sub), '', {qos:0, retain:true}); } catch(e){}
   }
   publishMe(){
     const me = (lread(this.lk()).players||{})[this.state.myId];
@@ -424,6 +461,9 @@ class Component extends DCLogic {
     const players = {};
     Object.keys(merged).forEach(id=>{ const p = merged[id]; if(p && p.team!=null && now - (p.ts||0) < 12000) players[id] = p; });
     this.setState({players});
+    const any = [st.game, this._anyGame].filter(g=>g && g.seed).sort((a,b)=>(b.at||0)-(a.at||0))[0];
+    const running = !!(any && (any.at||0) <= (this._lobbyAt||0) && now - (any.at||0) < 1800000);
+    if(running !== this.state.gameRunning) this.setState({gameRunning:running});
     const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
     const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
     if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
@@ -436,6 +476,7 @@ class Component extends DCLogic {
     this._resetAt = 0;
     this._lobbyAt = Date.now();
     this.netGame = null;
+    if(isHost) this._anyGame = null;
     if(isHost) lwrite({players:{}}, LKEY + ':' + room);
     else { const st = lread(LKEY + ':' + room); st.game = null; lwrite(st, LKEY + ':' + room); }
     this.setState({mode:'team', screen:'lobby', room, roomInput:room, score:0, correct:0, seed:0, players:{}, isHost:!!isHost}, ()=>this.connect(room));
@@ -445,8 +486,12 @@ class Component extends DCLogic {
     this._lobbyAt = Date.now();
     this.netGame = null;
     const st = lread(this.lk()); st.game = null; lwrite(st, this.lk());
-    if(this.state.isHost){ try { if(this._fb) this._fb.ref.child('game').remove(); } catch(e){} }
-    this.setState({screen:'lobby', seed:0, score:0, correct:0, picked:null});
+    if(this.state.isHost){
+      this._anyGame = null;
+      this.clearRetained('game');
+      try { if(this._fb) this._fb.ref.child('game').remove(); } catch(e){}
+    }
+    this.setState({screen:'lobby', seed:0, score:0, correct:0, picked:null, gameRunning:false});
   };
   joinTeam = t => ()=>{
     const name = (this.state.name||'').trim();
@@ -458,6 +503,8 @@ class Component extends DCLogic {
     this.publishMe();
   };
   leaveLobby = ()=>{
+    this.clearRetained('p/'+this.state.myId);
+    if(this.state.isHost){ this.clearRetained('game'); this._anyGame = null; }
     this.pub('p/'+this.state.myId, {id:this.state.myId, team:null, ts:0});
     this.mutate(s=>{ if(s.players) delete s.players[this.state.myId]; return s; });
     this.closeNet();
@@ -483,7 +530,12 @@ class Component extends DCLogic {
     this.beginGame(seed);
   };
   beginGame(seed){
-    if(!this.pool.length){ this.setState({screen:'lobby'}); return; }
+    if(!this.pool.length){
+      this.setState({screen:'lobby'});
+      if(!this._retry){ this._retry = setTimeout(()=>{ this._retry = null; if(this.state.screen==='lobby') this.beginGame(seed); }, 500); }
+      return;
+    }
+    clearTimeout(this._retry); this._retry = null;
     this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null}, ()=>{ this.tick(); this.publishMe(); });
     this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
   }
@@ -497,7 +549,8 @@ class Component extends DCLogic {
   }
   roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
   componentWillUnmount(){
-    clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll); this.closeNet();
+    clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll);
+    clearInterval(this._retryNet); clearTimeout(this._retry); this.closeNet();
     window.removeEventListener('storage', this._onStorage);
     try { if(this._ch) this._ch.close(); } catch(e){}
   }
@@ -599,7 +652,10 @@ class Component extends DCLogic {
       connColor: s.conn==='online' ? 'oklch(0.80 0.15 160)' : s.conn==='connecting' ? 'oklch(0.80 0.15 75)' : 'oklch(0.72 0.17 30)',
       myTeamName: mine && mine.team!=null ? TEAM_NAMES[mine.team] : '—',
       canStart: ids.length>0 && !!mine && mine.team!=null,
-      isHost: !!s.isHost, isGuest: !s.isHost,
+      isHost: !!s.isHost, isGuest: !s.isHost && !s.gameRunning,
+      gameRunning: !s.isHost && !!s.gameRunning,
+      dataLoading: !s.isHost && !lfList().length,
+      offline: s.conn==='local', reconnect: this.reconnect,
       lobbyHint: !nameOk ? 'Zuerst Namen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
       t0: T[0].members, t1: T[1].members, t2: T[2].members, t3: T[3].members,
       c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
