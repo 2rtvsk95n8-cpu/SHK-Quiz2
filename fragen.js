@@ -1,5 +1,5 @@
 // Wiederholungsfragen je Lernfeld – "korrekt" ist der Index (0-3) der richtigen Antwort
-window.FRAGEN = {
+export const FRAGEN = {
  "titel": "Anlagenmechaniker SHK – Wiederholungsfragen",
  "version": 1,
  "lernfelder": [
@@ -5308,3 +5308,6 @@ window.FRAGEN = {
   }
  ]
 };
+
+export default FRAGEN;
+if (typeof window !== "undefined") window.FRAGEN = FRAGEN;

@@ -1,0 +1,18 @@
+{
+  "name": "Anlagenmechaniker Quizapp",
+  "short_name": "AM Quiz",
+  "description": "Wiederholungsfragen Anlagenmechaniker SHK, Lernfelder 1-15",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101018",
+  "theme_color": "#101018",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><script src="fragen.js"></script><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><link rel="manifest" href="manifest.webmanifest"><script type="module" src="fragen.js"></script><style>
 html,body{margin:0;background:#101018;-webkit-font-smoothing:antialiased}
 a{color:#7dd3c0}a:hover{color:#a7e8da}
 @keyframes amqPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
@@ -275,7 +275,11 @@ class Component extends DCLogic {
   awaitQuestions(){
     if(lfList().length){ this.setState({dataReady:true}); return; }
     let tries = 0;
-    this.loadScript('fragen.js');
+    import('./fragen.js').then(m=>{
+      const d = m.FRAGEN || m.default;
+      if(d && d.lernfelder && !window.FRAGEN) window.FRAGEN = d;
+      if(lfList().length){ clearInterval(this._dataPoll); this.setState({dataReady:true}); }
+    }).catch(()=>{});
     this._dataPoll = setInterval(()=>{
       tries++;
       if(lfList().length){ clearInterval(this._dataPoll); this.setState({dataReady:true}); }
