@@ -1,14 +1,16 @@
 # Anlagenmechaniker Quizapp
 
-Kahoot-artiges Quiz zu **Lernfeld 5, Kapitel 5.4 – Technische Regeln für
-Trinkwasser-Installationen**. 50 Fragen mit je vier Antworten, 25 Sekunden pro
-Frage, Punkte nach Antwortgeschwindigkeit plus Serien-Bonus.
+Kahoot-artiges Quiz für **Anlagenmechaniker SHK, Lernfelder 1–15**.
+401 Wiederholungsfragen mit je vier Antworten, 25 Sekunden pro Frage, Punkte
+nach Antwortgeschwindigkeit plus Serien-Bonus. Das Lernfeld wird zu Beginn
+ausgewählt (einzeln oder alle gemischt).
 
 Die App wird über GitHub Pages ausgeliefert. Für die Live-Synchronisation nutzt
 sie die Firebase Realtime Database, sobald `docs/firebase-config.js` ausgefüllt
 ist – andernfalls automatisch einen öffentlichen MQTT-Broker (ohne Konfiguration).
 
 ## Funktionen
+- Auswahl des Lernfelds (LF 1–15 oder alle gemischt) vor dem Start
 - Einzelmodus und Teammodus (vier Teams, max. 4 Spieler pro Team)
 - Ein fester Raum `TW54` – kein Code nötig, Beitritt per QR-Code
 - Live-Anzeige von Teambesetzung und Punktestand auf allen Geräten
@@ -19,6 +21,7 @@ ist – andernfalls automatisch einen öffentlichen MQTT-Broker (ohne Konfigurat
 ```
 Anlagenmechaniker Quizapp.dc.html   Quelldatei (zum Weiterentwickeln)
 docs/index.html                     fertige App für GitHub Pages
+docs/fragen.js                      Fragenkatalog (LF 1–15)
 docs/firebase-config.js             Firebase-Zugangsdaten (optional)
 docs/database.rules.json            Regeln zum Einfügen in die Realtime Database
 docs/.nojekyll
@@ -55,6 +58,8 @@ Die Statusanzeige in der Lobby zeigt „Online verbunden“. Erscheint dort
 erreichbar; dann funktioniert die Synchronisation nur zwischen Tabs desselben
 Geräts.
 
-## Quelle der Fragen
-Musterlösung zum Arbeitsblatt Kapitel 5.4. Formulierungen können vom Fachbuch
-abweichen.
+## Fragenkatalog
+`fragen.js` enthält alle Fragen nach Lernfeldern (`window.FRAGEN`), Feldnamen:
+`frage`, `antworten` (4 Stück), `korrekt` (Index 0–3), `erklaerung`, `thema`.
+Neue Fragen einfach dort ergänzen – die App liest sie beim Laden ein.
+Formulierungen können vom Fachbuch abweichen.

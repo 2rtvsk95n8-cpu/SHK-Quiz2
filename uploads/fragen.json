@@ -1,5 +1,4 @@
-// Wiederholungsfragen je Lernfeld – "korrekt" ist der Index (0-3) der richtigen Antwort
-window.FRAGEN = {
+{
  "titel": "Anlagenmechaniker SHK – Wiederholungsfragen",
  "version": 1,
  "lernfelder": [
@@ -5307,4 +5306,4 @@ window.FRAGEN = {
    ]
   }
  ]
-};
+}

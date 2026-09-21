@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><style>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><script src="fragen.js"></script><style>
 html,body{margin:0;background:#101018;-webkit-font-smoothing:antialiased}
 a{color:#7dd3c0}a:hover{color:#a7e8da}
 @keyframes amqPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
@@ -28,18 +28,43 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
 <div style="width:100%;max-width:1000px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start">
 <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:34px 32px">
-<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Lernfeld 5 · Kapitel 5.4</div>
-<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Technische Regeln für Trinkwasser-Installationen</h1>
-<p style="margin:0 0 26px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">{{ total }} Fragen aus dem Arbeitsblatt. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Anlagenmechaniker SHK</div>
+<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Wiederholungsfragen Lernfeld 1–15</h1>
+<p style="margin:0 0 22px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">Lernfeld wählen, dann {{ wanted }} Fragen daraus. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
+
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:10px">Lernfeld wählen</div>
+<sc-if value="{{ dataWaiting }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:20px;font-size:14px;color:rgba(242,242,245,.6);margin-bottom:22px">Fragen werden geladen …</div>
+</sc-if>
+<sc-if value="{{ dataReady }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:12px">
+<sc-for list="{{ lfOptions }}" as="l" hint-placeholder-count="15">
+<button onClick="{{ l.onClick }}" style="text-align:left;background:{{ l.bg }};border:1px solid {{ l.bc }};border-radius:11px;padding:11px 13px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:oklch(0.82 0.13 75)">{{ l.nr }}</span>
+<span style="font-size:13px;line-height:1.3">{{ l.titel }}</span>
+<span style="font-size:11.5px;opacity:.5">{{ l.count }}</span>
+</button>
+</sc-for>
+</div>
+<button onClick="{{ pickAll }}" style="width:100%;text-align:left;background:{{ allBg }};border:1px solid {{ allBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Alle Lernfelder gemischt</span>
+<span style="font-size:12px;opacity:.55">{{ allCount }}</span>
+</button>
+</sc-if>
+
+<div style="font-size:13.5px;color:rgba(242,242,245,.62);margin-bottom:16px">Gewählt: <span style="color:#f2f2f5;font-weight:600">{{ lfLabel }}</span></div>
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
 <input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1 1 200px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:15px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
-<button onClick="{{ start }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Alleine spielen</button>
-<button onClick="{{ openLobby }}" style="flex:0 0 auto;background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:15px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Raum leiten · Teams</button>
+<button onClick="{{ start }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:oklch(0.78 0.16 55)">Alleine spielen</button>
+<button onClick="{{ openLobby }}" style="flex:0 0 auto;background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:15px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:rgba(255,255,255,.08)">Raum leiten · Teams</button>
 <button onClick="{{ joinAsGuest }}" style="flex:0 0 auto;background:transparent;color:rgba(242,242,245,.7);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Als Spieler beitreten</button>
 </div>
-<div style="margin-top:26px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:rgba(242,242,245,.5)">
+<div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:rgba(242,242,245,.5)">
 <span>{{ secs }} Sekunden pro Frage</span><span>Max. 1000 Punkte pro Frage</span><span>Bestleistung: {{ best }}</span>
 </div>
+<sc-if value="{{ lfChosen }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:10px;font-size:13px;color:rgba(242,242,245,.5)">{{ poolSize }} Fragen im gewählten Lernfeld verfügbar</div>
+</sc-if>
 </div>
 <div style="background:#fff;color:#101018;border-radius:20px;padding:24px;text-align:center">
 <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px">Mit dem Handy beitreten</div>
@@ -63,7 +88,10 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:4px">Raumcode</div>
 <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:6px;line-height:1;color:oklch(0.80 0.15 75)">{{ room }}</div>
 </div>
-<div style="margin-left:auto;font-size:13px;color:rgba(242,242,245,.5);max-width:26ch;text-wrap:pretty">Ein gemeinsamer Raum für die ganze Klasse – kein Code nötig, QR-Code scannen genügt.</div>
+<div style="margin-left:auto;text-align:right">
+<div style="font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:4px">Lernfeld</div>
+<div style="font-size:14px;font-weight:600;max-width:30ch;text-wrap:pretty">{{ lfLabel }}</div>
+</div>
 </div>
 <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:0 0 16px;letter-spacing:-.4px">Teams bilden</h2>
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
@@ -200,60 +228,6 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;questionCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;timerSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;shuffleQuestions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Quiz&quot;}}">
-const QUESTIONS = [
- {c:"1 Normung",q:"Welche Norm enthält die technischen Regeln für Trinkwasser-Installationen?",o:["DIN EN 806","DIN EN 1717","DIN 1988-300","DIN 4109"],a:0,e:"DIN EN 806 – Technische Regeln für Trinkwasser-Installationen."},
- {c:"1 Normung",q:"In wie viele Teile gliedert sich die DIN EN 806?",o:["Drei Teile","Vier Teile","Fünf Teile","Sechs Teile"],a:2,e:"Fünf Teile: 1 Allgemeines, 2 Planung, 3 Berechnung, 4 Installation, 5 Betrieb und Wartung."},
- {c:"1 Normung",q:"Welche Norm regelt den Schutz des Trinkwassers und die Erhaltung der Trinkwassergüte?",o:["DIN 1988-500","DIN EN 1717","DIN 4807-5","DIN EN 806-3"],a:1,e:"DIN EN 1717 – Schutz des Trinkwassers und Erhaltung der Trinkwassergüte."},
- {c:"1 Normung",q:"Was regelt DIN 1988-300?",o:["Schutz des Trinkwassers","Installation","Ermittlung der Rohrdurchmesser","Feuerlöschanlagen"],a:2,e:"DIN 1988-300 regelt die Ermittlung der Rohrdurchmesser. 100 = Schutz des Trinkwassers, 200 = Installation, 500 = Druckerhöhungsanlagen, 600 = Feuerlöschanlagen."},
- {c:"1 Normung",q:"Welcher Teil der DIN 1988 behandelt Druckerhöhungsanlagen?",o:["DIN 1988-100","DIN 1988-200","DIN 1988-500","DIN 1988-600"],a:2,e:"DIN 1988-500 – Druckerhöhungsanlagen."},
- {c:"1 Normung",q:"Welche Richtlinie über Trinkwasserhygiene ist zusätzlich zu beachten?",o:["VDI/DVGW 6023","VDI 2035","DVGW W 551","VDI 6022"],a:0,e:"Richtlinie VDI/DVGW 6023. VDI = Verein Deutscher Ingenieure, DVGW = Deutscher Verein des Gas- und Wasserfaches."},
- {c:"2 Leitungsteile",q:"Wie viele Leitungsteile hat eine Trinkwasseranlage?",o:["Fünf","Sechs","Sieben","Acht"],a:2,e:"Sieben: Anschlussleitung, Wasserzähleranlage, Verbrauchsleitungen, Sammelzuleitungen, Steigleitungen, Stockwerksleitungen, Einzelzuleitungen."},
- {c:"2 Leitungsteile",q:"Welcher Leitungsteil folgt auf dem Weg des Trinkwassers direkt auf die Wasserzähleranlage?",o:["Steigleitung","Sammelzuleitung","Stockwerksleitung","Einzelzuleitung"],a:1,e:"Versorgungsleitung → Anschlussleitung → Wasserzähleranlage → Sammelzuleitung → Steigleitung → Stockwerksleitung → Einzelzuleitung."},
- {c:"3 Sinnbilder",q:"Welches Kurzzeichen nach DIN EN 806-1 steht für Trinkwasser, kalt?",o:["PW","PWC","PWH","PWH-C"],a:1,e:"PWC = Trinkwasser, kalt. PW = Trinkwasser allgemein."},
- {c:"3 Sinnbilder",q:"Welcher deutschen Abkürzung entspricht PWH-C?",o:["TW","TWW","TWZ","PWC"],a:2,e:"PWH-C (Trinkwasser, warm, Zirkulation) entspricht TWZ. PWC entspricht TW, PWH entspricht TWW."},
- {c:"4 Hausanschluss",q:"Wie wird der Anschluss an die öffentliche Versorgungsleitung hergestellt?",o:["Über Anbohrschellen bei unter Druck stehender Leitung","Nach Entleerung der Versorgungsleitung durch Einschweißen","Über einen Systemtrenner BA","Durch Aufpressen eines Isolierstücks"],a:0,e:"Der Anschluss erfolgt über Anbohrschellen, die Leitung steht dabei unter Druck. Bei einigen Schellen verbleibt der Bohrer als Absperrorgan."},
- {c:"4 Hausanschluss",q:"Die Anschlussleitung verläuft bis 1 m neben einer Entwässerungsleitung. Was gilt?",o:["Sie muss mindestens 0,5 m tiefer liegen","Sie darf nicht tiefer als die Abwasserleitung liegen","Sie muss überbaut werden","Sie darf nicht absperrbar sein"],a:1,e:"Bei Annäherung bis 1 m darf die Anschlussleitung nicht tiefer als die Abwasserleitung liegen. Sie ist geradlinig, frostfrei und nicht überbaut zu verlegen."},
- {c:"4 Hausanschluss",q:"Welche Aufgabe hat ein Isolierstück?",o:["Es dämmt die Leitung gegen Wärme","Es unterbricht die elektrische Leitfähigkeit der Rohrleitung","Es hält den Druck konstant","Es verhindert Rückfließen"],a:1,e:"Es unterbricht die elektrische Leitfähigkeit und mindert die Gefahr elektrochemischer Korrosion. Einbau nahe der Absperreinrichtung im Gebäude, grün gekennzeichnet."},
- {c:"5 Wasserzähleranlage",q:"Welches Bauteil gehört zur Wasserzähleranlage?",o:["Druckminderer","Rückflussverhinderer mit Prüfeinrichtung","Systemtrenner BA","Rohrbelüfter HB"],a:1,e:"Zur Wasserzähleranlage gehören HAE, Wasserzähler, Absperrventil, Rückflussverhinderer mit Prüfeinrichtung und Entleerungsventil."},
- {c:"5 Wasserzähleranlage",q:"Wie wird beim Trockenläufer die Drehung des Flügelrads auf das Zählwerk übertragen?",o:["Über eine Magnetkupplung","Über eine Zahnradkette im Wasser","Über einen Impulsgeber am Gehäuse","Über eine Membrane"],a:0,e:"Beim Trockenläufer ist das Zählwerk vollkommen vom Wasser getrennt, die Übertragung erfolgt über eine Magnetkupplung. Bevorzugt bei Wasser, das zu Ablagerungen neigt."},
- {c:"5 Wasserzähleranlage",q:"Welcher Zähler ist eine Bauart der Großwasserzähler?",o:["Einstrahlzähler","Woltmanzähler","Nassläufer-Kleinzähler","Wärmemengenzähler"],a:1,e:"Bauarten: Großflügelrad-Wasserzähler, Ringkolbenzähler, Woltmanzähler, Venturizähler."},
- {c:"5 Wasserzähleranlage",q:"Wie lange gilt die Eichung von Kalt- und Warmwasserzählern?",o:["Kaltwasser 6 Jahre, Warmwasser 5 Jahre","Kaltwasser 5 Jahre, Warmwasser 6 Jahre","Beide 8 Jahre","Beide 10 Jahre"],a:0,e:"Kaltwasserzähler 6 Jahre, Warmwasserzähler 5 Jahre. Danach ist ein Austauschzähler einzubauen."},
- {c:"5 Wasserzähleranlage",q:"Welche Aufgabe hat der Wasserzähler-Anschlussbügel?",o:["Er erhöht den Durchfluss","Er ermöglicht spannungsfreien Einbau und erhält die elektrische Schutzmaßnahme","Er mindert Fließgeräusche","Er sichert gegen Rückfließen"],a:1,e:"Er ermöglicht einen spannungsfreien Einbau und verhindert die Unterbrechung einer elektrischen Schutzmaßnahme."},
- {c:"5 Wasserzähleranlage",q:"Wann liegt geschäftlicher Verkehr vor, der geeichte Zähler verlangt?",o:["Nur beim Wasserversorgungsunternehmen","Immer wenn eine Rechnung erstellt wird, z. B. Vermieter–Mieter","Nur in Industriebetrieben","Nur bei Warmwasser"],a:1,e:"Immer dann, wenn eine Rechnung erstellt wird, z. B. vom WVU oder bei der Abrechnung zwischen Vermieter und Mieter."},
- {c:"6 Druckminderer",q:"Ab welchem Ruhedruck an der Entnahmestelle ist ein Druckminderer zur Minderung der Fließgeräusche einzubauen?",o:["über 3 bar","über 4 bar","über 5 bar","über 8 bar"],a:2,e:"Wenn der Ruhedruck an der Entnahmestelle 5 bar überschreitet."},
- {c:"6 Druckminderer",q:"Ein Druckminderer ist nötig, wenn der Ruhedruck welchen Anteil des Ansprechdrucks eines Sicherheitsventils überschreitet?",o:["50 %","65 %","80 %","95 %"],a:2,e:"Bei mehr als 80 % des Ansprechdrucks eines Sicherheitsventils, z. B. am Trinkwassererwärmer."},
- {c:"6 Druckminderer",q:"Warum besitzt ein Druckminderer ein eingebautes Sieb?",o:["Er ist empfindlich gegen eingeschwemmte Partikel – das Sieb muss regelmäßig gereinigt werden","Es erhöht den Ausgangsdruck","Es dient als Rückflussverhinderer","Es dämpft Wasserschläge dauerhaft wartungsfrei"],a:0,e:"Druckminderer sind empfindlich gegenüber eingeschwemmten Partikeln, deshalb das Sieb. Es muss regelmäßig gewartet bzw. gereinigt werden."},
- {c:"6 Druckminderer",q:"Welche Fließgeschwindigkeit und welche Norm gelten für den Schallschutz?",o:["2 m/s, DIN 4109","5 m/s, DIN 4109","2 m/s, DIN 1988-600","0,5 m/s, DIN EN 1717"],a:0,e:"2 m/s bezogen auf den Spitzen-Volumenstrom; zu beachten ist DIN 4109 (Schallschutz im Wohnungsbau)."},
- {c:"7 Trinkwassergüte",q:"Welche der folgenden ist eine der sechs wesentlichen Ursachen für die Gefährdung der Trinkwassergüte?",o:["Zu großer Rohrdurchmesser","Stagnation des Wassers","Gedämmte Kaltwasserleitung","Drehzahlgeregelte Pumpe"],a:1,e:"Rückfließen, unzulässige Verbindung mit anderen Anlagen, äußere Einflüsse, Werk-, Betriebs- und Hilfsstoffe, Stagnation, unsachgemäße Wartung."},
- {c:"7 Trinkwassergüte",q:"Was bedeutet Stagnation und was wird im häuslichen Bereich empfohlen?",o:["Stillstand des Wassers – Stagnationswasser zunächst auslaufen lassen","Druckstoß – Anlage entleeren","Rückfließen – Systemtrenner einbauen","Erwärmung – Leitung spülen und dämmen"],a:0,e:"Stagnation ist Stillstand des Wassers. Nach längeren Stillstandszeiten kann die Güte beeinträchtigt sein, deshalb Stagnationswasser auslaufen lassen."},
- {c:"7 Trinkwassergüte",q:"Welche Temperatur darf Kaltwasser 30 s nach vollem Öffnen der Entnahmestelle nicht übersteigen?",o:["20 °C","25 °C","30 °C","35 °C"],a:1,e:"25 °C. Kaltwasserleitungen müssen ausreichenden Abstand zu Wärmequellen halten und gedämmt werden."},
- {c:"8 Sicherungseinrichtungen",q:"Welche Sicherungsart ist heute Stand der Technik?",o:["Sammelsicherung je Steigleitung","Einzelsicherung jeder Entnahmearmatur","Sicherung nur am Hausanschluss","Sicherung am Wasserzähler genügt"],a:1,e:"Sammelsicherungen werden wegen vieler Nachteile nicht mehr gebaut, die Einzelsicherung ist Stand der Technik."},
- {c:"8 Sicherungseinrichtungen",q:"Welche Flüssigkeitskategorie beschreibt eine Gesundheitsgefährdung durch Erreger übertragbarer Krankheiten?",o:["Kategorie 2","Kategorie 3","Kategorie 4","Kategorie 5"],a:3,e:"Kategorie 5: Flüssigkeit, die eine Gesundheitsgefährdung durch Erreger übertragbarer Krankheiten bewirken kann."},
- {c:"8 Sicherungseinrichtungen",q:"Welche Flüssigkeit fällt in Kategorie 2?",o:["Wasser direkt aus der Trinkwasser-Installation","Flüssigkeit ohne Gesundheitsgefährdung, die aber Geschmack, Geruch, Farbe oder Temperatur verändern kann","Flüssigkeit mit giftigen Stoffen","Flüssigkeit mit radioaktiven Substanzen"],a:1,e:"Kategorie 2: keine Gesundheitsgefährdung, für den menschlichen Gebrauch geeignet, kann aber Geschmack, Geruch, Farbe oder Temperatur verändern."},
- {c:"8 Sicherungseinrichtungen",q:"Welche Sicherungseinrichtung steht hinter dem Kurzzeichen AA?",o:["Ungehinderter freier Auslauf","Kontrollierbarer Rückflussverhinderer","Rohrbelüfter für Schlauchanschlüsse","Rohrtrenner mit kontrollierbarer Mitteldruckzone"],a:0,e:"AA = ungehinderter freier Auslauf. EA = kontrollierbarer Rückflussverhinderer, HB = Rohrbelüfter für Schlauchanschlüsse, BA = Systemtrenner."},
- {c:"8 Sicherungseinrichtungen",q:"Wofür steht das Kurzzeichen BA?",o:["Rohrunterbrecher mit beweglichen Teilen","Rohrtrenner, nicht durchflussgesteuert","Rohrtrenner (Systemtrenner) mit kontrollierbarer Mitteldruckzone","Ungehinderter freier Auslauf"],a:2,e:"BA = Rohrtrenner (Systemtrenner) mit kontrollierbarer Mitteldruckzone. GA = Rohrtrenner, nicht durchflussgesteuert, DB = Rohrunterbrecher mit beweglichen Teilen."},
- {c:"8 Sicherungseinrichtungen",q:"Welcher Mindestabstand h gilt beim freien Auslauf AA?",o:["Mindestens 1 × di, nicht unter 10 mm","Mindestens 2 × di, nicht unter 20 mm","Mindestens 150 mm","Mindestens 250 mm"],a:1,e:"h zwischen höchstmöglichem Wasserspiegel und Zulauföffnung: mindestens 2 × di, darf 20 mm nicht unterschreiten."},
- {c:"8 Sicherungseinrichtungen",q:"Was darf hinter einem Rohrunterbrecher nicht eingebaut werden?",o:["Eine Absperrarmatur","Ein Rückflussverhinderer","Ein Filter","Ein Druckminderer"],a:0,e:"Hinter dem Rohrunterbrecher darf keine Absperrarmatur sitzen, sonst tritt Wasser aus den Belüftungsöffnungen aus."},
- {c:"8 Sicherungseinrichtungen",q:"Wie hoch muss ein Rohrunterbrecher über dem höchstmöglichen Wasserspiegel eingebaut werden?",o:["Mindestens 20 mm","Mindestens 150 mm","Mindestens 250 mm","Mindestens 400 mm"],a:1,e:"Mindestens 150 mm über dem höchstmöglichen Wasserspiegel – beim WC-Druckspüler mindestens 400 mm über der Oberkante des Klosettbeckens."},
- {c:"8 Sicherungseinrichtungen",q:"Aus welchen Bauteilen besteht die Sicherungskombination HD am Gartenventil?",o:["Rohrbelüfter HB und Rückflussverhinderer EB","Rohrtrenner CA und Filter","Systemtrenner BA und Druckminderer","Freier Auslauf AA und Absperrventil"],a:0,e:"Kombination aus Rohrbelüfter HB und Rückflussverhinderer EB, mindestens 250 mm über dem höchstmöglichen Wasserspiegel."},
- {c:"8 Sicherungseinrichtungen",q:"Bei welchem Druckabfall trennt ein Rohrtrenner CA die Rohrleitung?",o:["Bei ca. 5 % Abnahme von p1 gegenüber p2","Bei ca. 10 % Abnahme von p1 gegenüber p2","Bei 140 mbar Differenz","Bei 1 bar Differenz"],a:1,e:"Der Rohrtrenner CA trennt, wenn der Zulaufdruck p1 um ca. 10 % gegenüber p2 abnimmt; die Mitteldruckzone wird belüftet."},
- {c:"8 Sicherungseinrichtungen",q:"Bei welcher Druckdifferenz löst die Trennung eines Systemtrenners BA aus?",o:["14 mbar","140 mbar","1,4 bar","10 % des Vordrucks"],a:1,e:"Systemtrenner BA haben drei kontrollierbare Druckzonen; Trennung bei 140 mbar zwischen Vor- und Mitteldruckkammer."},
- {c:"8 Sicherungseinrichtungen",q:"Warum ist ein Füllschlauch mit Rückflussverhinderer zur Heizungsanlage nicht mehr erlaubt?",o:["Er bietet nicht die nach DIN EN 1717 geforderte Sicherheit – nötig ist ein Rohrtrenner","Er ist zu lang","Er verursacht Fließgeräusche","Er ist nicht eichfähig"],a:0,e:"Die Verbindung muss über einen Rohrtrenner erfolgen, dabei ist zwischen Heizungswasser mit und ohne Inhibitoren zu unterscheiden."},
- {c:"9 Spülen und Prüfen",q:"Welche Regel gilt beim Spülen der Trinkwasser-Installation?",o:["Fließgeschwindigkeit mind. 2 m/s, Abschnitte max. 100 m","Fließgeschwindigkeit max. 0,5 m/s, Abschnitte max. 300 m","Spülen nur von oben nach unten in einem Zug","Spülen erst nach der Übergabe an den Betreiber"],a:0,e:"Mind. 2 m/s, abschnittsweise (max. 100 m), von unten nach oben und von der nächstgelegenen zur entferntesten Steigleitung."},
- {c:"9 Spülen und Prüfen",q:"Welche Spüldauer ist vorgeschrieben?",o:["Mind. 5 s je Meter, 30 s je Entnahmestelle","Mind. 15 s je Meter, mind. 2 Minuten je Entnahmestelle","Mind. 1 Minute je Meter, 10 Minuten je Entnahmestelle","Nur bis das Wasser klar ist"],a:1,e:"Mindestens 15 s je Meter Leitungslänge und mindestens 2 Minuten je Entnahmestelle."},
- {c:"9 Spülen und Prüfen",q:"Wie hoch ist der Prüfdruck bei Metall- und Verbundrohren und wie lange wird geprüft?",o:["5 bar über Betriebsdruck, i. d. R. 15 bar, 10 Minuten","1 bar über Betriebsdruck, 30 Minuten","150 mbar, 10 Minuten","3 bar, 2 Stunden"],a:0,e:"5 bar über dem zulässigen Betriebsdruck, in der Regel 15 bar; Prüfzeit nach Temperaturausgleich 10 Minuten."},
- {c:"9 Spülen und Prüfen",q:"Welche Wartezeit gilt bei mehr als 10 K Differenz zwischen Umgebungs- und Füllwassertemperatur?",o:["10 Minuten","20 Minuten","30 Minuten","60 Minuten"],a:2,e:"Bei Temperaturdifferenzen größer 10 K ist eine Wartezeit von 30 Minuten einzuhalten."},
- {c:"9 Spülen und Prüfen",q:"Mit welchem Druck wird die Dichtheitsprüfung mit Luft durchgeführt?",o:["150 mbar","1 bar","3 bar","15 bar"],a:0,e:"Dichtheitsprüfung mit 150 mbar. Belastungsprüfung aus Sicherheitsgründen max. 1 bar bei > DN 50 bzw. 3 bar bei ≤ DN 50."},
- {c:"9 Spülen und Prüfen",q:"Was ist dem Betreiber bei der Übergabe zu geben?",o:["Nur die Rechnung","Wartungs- und Bedienungsanleitungen samt Einweisung","Eine Kopie der DIN EN 806","Das Spülprotokoll des WVU"],a:1,e:"Wartungs- und Bedienungsanleitungen übergeben, Betreiber einweisen und auf Sicherungs- und Absperrarmaturen hinweisen. Empfohlen: Inbetriebnahme- und Einweisungsprotokoll sowie Wartungsvertrag."},
- {c:"10 Druckerhöhung",q:"Wann ist eine Druckerhöhungsanlage erforderlich und wer genehmigt sie?",o:["Wenn der Versorgungsdruck für höher liegende Stockwerke nicht ausreicht – Genehmigung durch das WVU","Bei jedem Neubau – Genehmigung durch das Bauamt","Wenn der Ruhedruck über 5 bar liegt – Genehmigung durch den Installateur","Bei Feuerlöschanlagen – Genehmigung durch die Feuerwehr"],a:0,e:"Wenn der Druck im Versorgungsnetz nicht ausreicht, auch höher liegende Stockwerke zu versorgen. Die Genehmigung erteilt das zuständige WVU."},
- {c:"10 Druckerhöhung",q:"Wie hoch soll der Mindestfließdruck sein, und welcher Fließdruck soll nicht überschritten werden?",o:["0,5 bar / max. 3 bar","1,0 bis 1,2 bar / max. 5 bar","2,0 bar / max. 8 bar","1,5 bar / max. 10 bar"],a:1,e:"Mindestfließdruck 1,0 bis 1,2 bar; wegen des Schallschutzes soll der Fließdruck an den Entnahmestellen 5 bar nicht überschreiten."},
- {c:"10 Druckerhöhung",q:"Welche Pumpenbauart schreibt DIN 1988-500 vor?",o:["Einstufige Kolbenpumpen","Mehrstufige Kreiselpumpen mit Drehzahlregelung","Handpumpen als Notversorgung","Membranpumpen mit Druckbehälter"],a:1,e:"Mehrstufige Kreiselpumpen, stufig oder stufenlos drehzahlgeregelt nach Volumenstrom und Versorgungsdruck."},
- {c:"10 Druckerhöhung",q:"Höchste Entnahmestelle 32 m, Mindestversorgungsdruck 4 bar, Druckverluste 1,2 bar, Mindestdruck an der Entnahmestelle 1,0 bar. Bis zu welcher Höhe ist ohne Druckerhöhung zu versorgen?",o:["12 m","18 m","24 m","32 m"],a:1,e:"pe1 = 4 − 1,0 − 1,2 = 1,8 bar, das entspricht 18 m Höhe."},
- {c:"10 Druckerhöhung",q:"Wie groß ist im gleichen Beispiel die erforderliche Druckerhöhung für Druckzone 2?",o:["1,0 bar","1,4 bar","3,2 bar","5,4 bar"],a:1,e:"pe2 = 1,0 + 1,2 + 3,2 = 5,4 bar; Δp = 5,4 − 4 = 1,4 bar."},
- {c:"10 Druckerhöhung",q:"Warum ist bei DEA nach DIN 1988-500 meist kein Druckbehälter erforderlich?",o:["Weil drehzahlgeregelte Pumpen sich automatisch anpassen","Weil das WVU den Druck konstant hält","Weil Druckbehälter verboten sind","Weil der Ruhedruck immer ausreicht"],a:0,e:"Drehzahlgeregelte Pumpen passen sich Volumenstrom und Druck automatisch an. Kleine Behälter auf der Druckseite verhindern ein Anlaufen bei geringer Entnahme und müssen DIN 4807-5 entsprechen."},
- {c:"10 Druckerhöhung",q:"Welche Anforderungen gelten für den Aufstellraum einer DEA?",o:["Frostfrei, abschließbar, nicht anderweitig genutzt, zugänglich","Beliebiger Kellerraum mit Bodenablauf","Beheizt auf mindestens 20 °C","Nur im Dachgeschoss"],a:0,e:"Frostfreier, abschließbarer und nicht anderweitig genutzter Raum; die Anlage muss für Wartung und Reparatur zugänglich sein."}
-];
-
 const LKEY = 'amq-lobby-v1';
 const TOPIC = 'amq_tw54_quiz';
 const ROOM = 'TW54';
@@ -263,10 +237,19 @@ const TEAM_NAMES = ['Team 1','Team 2','Team 3','Team 4'];
 const MAX_PER_TEAM = 4;
 function lread(key){ try { return JSON.parse(localStorage.getItem(key || LKEY) || '{}') || {}; } catch(e){ return {}; } }
 function lwrite(next, key){ try { localStorage.setItem(key || LKEY, JSON.stringify(next)); } catch(e){} }
+function lfList(){ const d = (typeof window!=='undefined') ? window.FRAGEN : null; return (d && d.lernfelder) ? d.lernfelder : []; }
+function poolFor(nr){
+  const sel = nr==='all' ? lfList() : lfList().filter(x=>x.nr===nr);
+  const out = [];
+  sel.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
+    out.push({c:'LF '+lf.nr+' · '+(f.thema||lf.titel), q:f.frage, o:f.antworten, a:f.korrekt, e:f.erklaerung});
+  }); });
+  return out;
+}
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 
 class Component extends DCLogic {
-  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off'};
+  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off', lf:null};
   qrRef = React.createRef();
   lobbyQrRef = React.createRef();
   netPlayers = {};
@@ -287,6 +270,18 @@ class Component extends DCLogic {
     this._onStorage = e => { if(!e || e.key===LKEY) this.syncLobby(); };
     window.addEventListener('storage', this._onStorage);
     this._poll = setInterval(()=>{ this.heartbeat(); this.syncLobby(); }, 1800);
+    this.awaitQuestions();
+  }
+  awaitQuestions(){
+    if(lfList().length){ this.setState({dataReady:true}); return; }
+    let tries = 0;
+    this.loadScript('fragen.js');
+    this._dataPoll = setInterval(()=>{
+      tries++;
+      if(lfList().length){ clearInterval(this._dataPoll); this.setState({dataReady:true}); }
+      else if(tries > 120) clearInterval(this._dataPoll);
+      else this.forceUpdate();
+    }, 120);
   }
   componentDidUpdate(){ this.drawQr(); }
 
@@ -428,7 +423,8 @@ class Component extends DCLogic {
     const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
     const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
     if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
-      this.beginGame(game.seed);
+      const lf = (game.lf === 'all' || typeof game.lf === 'number') ? game.lf : this.state.lf;
+      this.setState({lf}, ()=>this.beginGame(game.seed));
     }
   }
 
@@ -465,7 +461,7 @@ class Component extends DCLogic {
     this.netPlayers = {}; this.netGame = null;
     this.setState({screen:'join', mode:'solo', seed:0, room:'', conn:'off', players:{}});
   };
-  openLobby = ()=>{ this.enterRoom(ROOM, true); };
+  openLobby = ()=>{ if(this.state.lf == null) return; this.enterRoom(ROOM, true); };
   resetLobby = ()=>{
     if(!this.state.isHost) return;
     const at = Date.now();
@@ -474,14 +470,16 @@ class Component extends DCLogic {
   };
   startTeamGame = ()=>{
     if(this.state.mode==='team' && !this.state.isHost) return;
+    if(!this.pool.length) return;
     const seed = Date.now() % 2147483647;
-    const game = {seed, at:Date.now()};
+    const game = {seed, at:Date.now(), lf:this.state.lf};
     this.netGame = game;
     this.mutate(s=>{ s.game = game; return s; });
     this.pub('game', game);
     this.beginGame(seed);
   };
   beginGame(seed){
+    if(!this.pool.length){ this.setState({screen:'lobby'}); return; }
     this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null}, ()=>{ this.tick(); this.publishMe(); });
     this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
   }
@@ -495,19 +493,21 @@ class Component extends DCLogic {
   }
   roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
   componentWillUnmount(){
-    clearInterval(this._iv); clearInterval(this._poll); this.closeNet();
+    clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll); this.closeNet();
     window.removeEventListener('storage', this._onStorage);
     try { if(this._ch) this._ch.close(); } catch(e){}
   }
 
   get secs(){ return Math.round(this.props.timerSeconds ?? 25); }
-  get count(){ return Math.min(Math.round(this.props.questionCount ?? 20), QUESTIONS.length); }
+  get pool(){ return poolFor(this.state.lf); }
+  get count(){ return Math.max(1, Math.min(Math.round(this.props.questionCount ?? 20), this.pool.length)); }
 
   shuffle(a, rnd){ const r=a.slice(); const f = rnd || Math.random; for(let i=r.length-1;i>0;i--){const j=Math.floor(f()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
 
   buildDeck(seed){
     const rnd = seed ? mulberry32(seed) : null;
-    const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(QUESTIONS, rnd) : QUESTIONS.slice();
+    const all = this.pool;
+    const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(all, rnd) : all.slice();
     return picked.slice(0, this.count).map(item=>{
       const idxs = this.shuffle([0,1,2,3], rnd);
       return {c:item.c, q:item.q, e:item.e, o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
@@ -515,8 +515,10 @@ class Component extends DCLogic {
   }
 
   start = ()=>{
+    if(this.state.lf == null || !this.pool.length) return;
     this.setState({mode:'solo', screen:'play', deck:this.buildDeck(), idx:0, score:0, streak:0, correct:0, picked:null}, this.tick);
   };
+  pickLf = nr => ()=>{ if(lfList().length) this.setState({lf:nr}); };
   tick = ()=>{
     clearInterval(this._iv);
     this._deadline = Date.now() + this.secs*1000;
@@ -571,6 +573,24 @@ class Component extends DCLogic {
       leaveLobby: this.leaveLobby, resetLobby: this.resetLobby, startTeamGame: this.startTeamGame,
       lobbyQrRef: this.lobbyQrRef, nameOk, playerTotal: ids.length,
       room: s.room, roomLink: this.roomLink(), joinAsGuest: this.joinAsGuest,
+      lfOptions: lfList().map(l=>({
+        nr:'LF '+l.nr, titel:l.titel, count:(l.fragen||[]).length+' Fragen',
+        bg: s.lf===l.nr ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
+        bc: s.lf===l.nr ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
+        onClick: this.pickLf(l.nr)
+      })),
+      allBg: s.lf==='all' ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
+      allBc: s.lf==='all' ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
+      pickAll: this.pickLf('all'),
+      allCount: poolFor('all').length + ' Fragen',
+      lfChosen: s.lf != null,
+      dataReady: !!lfList().length,
+      dataWaiting: !lfList().length,
+      readyOpacity: (s.lf != null && this.pool.length) ? 1 : 0.42,
+      readyCursor: (s.lf != null && this.pool.length) ? 'pointer' : 'not-allowed',
+      lfLabel: s.lf === 'all' ? 'Alle Lernfelder' : (s.lf != null ? ('LF ' + s.lf + ' · ' + ((lfList().find(l=>l.nr===s.lf)||{}).titel||'')) : 'Noch kein Lernfeld gewählt'),
+      poolSize: this.pool.length,
+      wanted: Math.round(this.props.questionCount ?? 20),
       connLabel: s.conn==='online' ? 'Online verbunden' : s.conn==='connecting' ? 'Verbinde…' : 'Offline – nur dieses Gerät',
       connColor: s.conn==='online' ? 'oklch(0.80 0.15 160)' : s.conn==='connecting' ? 'oklch(0.80 0.15 75)' : 'oklch(0.72 0.17 30)',
       myTeamName: mine && mine.team!=null ? TEAM_NAMES[mine.team] : '—',

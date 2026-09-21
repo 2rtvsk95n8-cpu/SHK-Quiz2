@@ -1,3 +1,96 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lernfeld-Quiz – Anlagenmechaniker SHK</title>
+<style>
+:root{--bg:#f3f5f7;--card:#fff;--ink:#1d2733;--muted:#5b6775;--line:#d7dde4;--kalt:#1f6fb2;--warm:#c8372d;--ok:#1d7a46;--okbg:#e3f3ea;--bad:#b3261e;--badbg:#fbe7e5;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11161c;--card:#1a2129;--ink:#e6ebf0;--muted:#9aa6b2;--line:#2c3641;--kalt:#5aa2e0;--warm:#ef6b5f;--ok:#5cc98a;--okbg:#17301f;--bad:#f08078;--badbg:#3a1c1a}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 "Segoe UI",Roboto,system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:1.5rem;margin:.2em 0 .1em}
+.pipe{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--warm) 0 50%,var(--kalt) 50% 100%);margin:10px 0 22px}
+.sub{color:var(--muted);margin:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:18px 0}
+.lf{text-align:left;background:var(--card);border:2px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;color:inherit;font:inherit}
+.lf b{display:block;color:var(--kalt)}
+.lf small{color:var(--muted)}
+.lf[aria-pressed="true"]{border-color:var(--kalt);box-shadow:inset 0 0 0 1px var(--kalt)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button.main,select{font:inherit;border-radius:8px;padding:10px 16px;border:2px solid var(--kalt)}
+button.main{background:var(--kalt);color:#fff;cursor:pointer;font-weight:600}
+button.main:disabled{opacity:.45;cursor:not-allowed}
+button.ghost{font:inherit;background:none;border:none;color:var(--kalt);cursor:pointer;text-decoration:underline;padding:6px}
+select{background:var(--card);color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px}
+.meta{color:var(--muted);font-size:.9rem;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.bar{height:6px;background:var(--line);border-radius:3px;margin:8px 0 16px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--kalt);transition:width .3s}
+.q{font-size:1.15rem;font-weight:600;margin:0 0 14px}
+.opt{display:block;width:100%;text-align:left;margin:8px 0;padding:12px 14px;border:2px solid var(--line);border-radius:10px;background:var(--card);color:inherit;font:inherit;cursor:pointer}
+.opt:hover:not(:disabled){border-color:var(--kalt)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;padding:12px 14px;border-radius:10px;border-left:5px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.bad{background:var(--badbg);border-color:var(--bad)}
+.big{font-size:2.4rem;font-weight:700;color:var(--kalt);margin:0}
+:focus-visible{outline:3px solid var(--warm);outline-offset:2px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Lernfeld-Quiz</h1>
+  <p class="sub">Anlagenmechaniker/-in für Sanitär-, Heizungs- und Klimatechnik</p>
+  <div class="pipe"></div>
+
+  <section id="start">
+    <p>Wähle ein oder mehrere Lernfelder aus:</p>
+    <div class="grid" id="lfGrid"></div>
+    <div class="row">
+      <button class="ghost" id="alle">Alle auswählen</button>
+      <button class="ghost" id="keine">Auswahl leeren</button>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <label>Anzahl Fragen
+        <select id="anzahl"><option value="10">10</option><option value="20" selected>20</option><option value="0">alle</option></select>
+      </label>
+      <button class="main" id="los" disabled>Quiz starten</button>
+    </div>
+  </section>
+
+  <section id="quiz" hidden>
+    <div class="card">
+      <div class="meta"><span id="info"></span><span id="stand"></span></div>
+      <div class="bar"><i id="fort"></i></div>
+      <p class="q" id="frage"></p>
+      <div id="opts"></div>
+      <div id="fb" class="fb" hidden></div>
+      <div class="row" style="margin-top:14px;justify-content:flex-end">
+        <button class="main" id="weiter" hidden>Weiter</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="ende" hidden>
+    <div class="card">
+      <p class="big" id="ergebnis"></p>
+      <p id="ergText"></p>
+      <div class="row">
+        <button class="main" id="fehler">Falsche Fragen wiederholen</button>
+        <button class="ghost" id="neu">Andere Lernfelder wählen</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
 // Wiederholungsfragen je Lernfeld – "korrekt" ist der Index (0-3) der richtigen Antwort
 window.FRAGEN = {
  "titel": "Anlagenmechaniker SHK – Wiederholungsfragen",
@@ -5308,3 +5401,73 @@ window.FRAGEN = {
   }
  ]
 };
+
+(function(){
+  const D = window.FRAGEN, $ = id => document.getElementById(id);
+  const sel = new Set();
+  let runde = [], pos = 0, punkte = 0, falsch = [];
+
+  // Lernfeld-Auswahl aufbauen
+  D.lernfelder.forEach(lf => {
+    const b = document.createElement('button');
+    b.className = 'lf'; b.setAttribute('aria-pressed','false');
+    b.innerHTML = `<b>Lernfeld ${lf.nr}</b>${lf.titel}<br><small>${lf.fragen.length} Fragen</small>`;
+    b.onclick = () => { sel.has(lf.nr) ? sel.delete(lf.nr) : sel.add(lf.nr); b.setAttribute('aria-pressed', sel.has(lf.nr)); upd(); };
+    b.dataset.nr = lf.nr; $('lfGrid').appendChild(b);
+  });
+  function upd(){ $('los').disabled = sel.size === 0; }
+  function setAll(on){ document.querySelectorAll('.lf').forEach(b => { const n=+b.dataset.nr; on?sel.add(n):sel.delete(n); b.setAttribute('aria-pressed', on); }); upd(); }
+  $('alle').onclick = () => setAll(true);
+  $('keine').onclick = () => setAll(false);
+
+  const mischen = a => { a = a.slice(); for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+  function starte(fragen){
+    runde = fragen; pos = 0; punkte = 0; falsch = [];
+    zeige('quiz'); frage();
+  }
+  $('los').onclick = () => {
+    let pool = D.lernfelder.filter(l => sel.has(l.nr)).flatMap(l => l.fragen.map(f => ({...f, lf:l.nr})));
+    pool = mischen(pool); const n = +$('anzahl').value;
+    starte(n ? pool.slice(0,n) : pool);
+  };
+
+  function frage(){
+    const f = runde[pos];
+    $('info').textContent = `Lernfeld ${f.lf}` + (f.thema ? ` · ${f.thema}` : '');
+    $('stand').textContent = `Frage ${pos+1} von ${runde.length}`;
+    $('fort').style.width = (pos/runde.length*100)+'%';
+    $('frage').textContent = f.frage;
+    $('fb').hidden = true; $('weiter').hidden = true;
+    const box = $('opts'); box.innerHTML = '';
+    // Antworten zusätzlich mischen, Index der richtigen merken
+    mischen(f.antworten.map((t,i)=>({t,i}))).forEach(o => {
+      const b = document.createElement('button');
+      b.className = 'opt'; b.textContent = o.t; b.dataset.i = o.i;
+      b.onclick = () => antwort(o.i, b); box.appendChild(b);
+    });
+  }
+  function antwort(i, btn){
+    const f = runde[pos], richtig = i === f.korrekt;
+    document.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.i === f.korrekt) b.classList.add('ok'); });
+    if (richtig) punkte++; else { btn.classList.add('bad'); falsch.push(f); }
+    const fb = $('fb'); fb.hidden = false; fb.className = 'fb ' + (richtig ? 'ok' : 'bad');
+    fb.innerHTML = `<strong>${richtig ? 'Richtig!' : 'Leider falsch.'}</strong> ${f.erklaerung}`;
+    $('weiter').hidden = false; $('weiter').textContent = pos+1 < runde.length ? 'Weiter' : 'Auswertung'; $('weiter').focus();
+  }
+  $('weiter').onclick = () => { pos++; pos < runde.length ? frage() : ende(); };
+
+  function ende(){
+    zeige('ende');
+    const pr = Math.round(punkte/runde.length*100);
+    $('ergebnis').textContent = `${punkte} / ${runde.length}`;
+    $('ergText').textContent = pr >= 80 ? `${pr} % – sehr gut!` : pr >= 50 ? `${pr} % – schon ordentlich, wiederhole die falschen Fragen.` : `${pr} % – lies die Kapitel noch einmal nach und versuche es erneut.`;
+    $('fehler').hidden = falsch.length === 0;
+  }
+  $('fehler').onclick = () => starte(mischen(falsch));
+  $('neu').onclick = () => zeige('start');
+  function zeige(id){ ['start','quiz','ende'].forEach(s => $(s).hidden = s !== id); window.scrollTo(0,0); }
+})();
+</script>
+</body>
+</html>
