@@ -54,7 +54,7 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 
 <div style="font-size:13.5px;color:rgba(242,242,245,.62);margin-bottom:16px">Gewählt: <span style="color:#f2f2f5;font-weight:600">{{ lfLabel }}</span></div>
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1 1 200px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:15px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Vorname" style="flex:1 1 200px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:15px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
 <button onClick="{{ start }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:oklch(0.78 0.16 55)">Alleine spielen</button>
 <button onClick="{{ openLobby }}" style="flex:0 0 auto;background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:15px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:rgba(255,255,255,.08)">Raum leiten · Teams</button>
 <button onClick="{{ joinAsGuest }}" style="flex:0 0 auto;background:transparent;color:rgba(242,242,245,.7);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Als Spieler beitreten</button>
@@ -95,7 +95,7 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 </div>
 <h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:0 0 16px;letter-spacing:-.4px">Teams bilden</h2>
 <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Name" style="flex:1 1 220px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Vorname" style="flex:1 1 220px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
 <div style="flex:0 0 auto;font-size:13.5px;color:rgba(242,242,245,.6)">Mein Team: <span style="color:#f2f2f5;font-weight:600">{{ myTeamName }}</span></div>
 </div>
 <div style="margin-top:12px;font-size:13.5px;color:rgba(242,242,245,.6);text-wrap:pretty">{{ lobbyHint }}</div>
@@ -232,6 +232,62 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
 <button onClick="{{ restart }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Nochmal spielen</button>
 <button onClick="{{ toJoin }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:14px 24px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Zur Startseite</button>
+</div>
+</div>
+</sc-if>
+
+<div style="width:100%;max-width:1000px;margin-top:auto;padding-top:28px;display:flex;justify-content:flex-end">
+<button onClick="{{ openImpressum }}" style="background:transparent;border:none;padding:4px 2px;color:rgba(242,242,245,.35);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline" style-hover="color:rgba(242,242,245,.7)">Impressum</button>
+</div>
+
+<sc-if value="{{ impressumOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(10,10,16,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 18px;overflow:auto;z-index:60">
+<div style="width:100%;max-width:720px;background:#16161f;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:32px 34px 36px;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px">
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;margin:0;letter-spacing:-.3px">Impressum</h2>
+<button onClick="{{ closeImpressum }}" style="flex:0 0 auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:8px 14px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer" style-hover="background:rgba(255,255,255,.16)">Schließen</button>
+</div>
+<div style="font-size:13.5px;line-height:1.6;color:rgba(242,242,245,.78);display:flex;flex-direction:column;gap:16px;text-wrap:pretty">
+<p style="margin:0">Diese Anwendung ist ein nichtkommerzielles Unterrichtsmaterial für den Einsatz im Fachunterricht Anlagenmechaniker SHK an den Berufsbildenden Schulen Ammerland.</p>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:#f2f2f5;margin-bottom:4px">Verantwortlich für den Inhalt:</div>
+<p style="margin:0">Christian Hamjediers, Lehrkraft<br>Berufsbildende Schulen Ammerland<br>Elmendorfer Straße 59, 26160 Bad Zwischenahn</p>
+</div>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#f2f2f5;margin-bottom:5px">Hinweis zur Nutzung</div>
+<p style="margin:0">Die Anwendung dient ausschließlich der Wiederholung und Übung im Unterricht. Die Fragen wurden sorgfältig erstellt, können aber Fehler enthalten und von Fachbüchern oder aktuellen Normen abweichen. Maßgeblich sind die im Unterricht verwendeten Lehrmaterialien, die geltenden Regelwerke und die Hinweise der Lehrkraft. Eine Gewähr für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte wird nicht übernommen. Die Ergebnisse im Quiz haben keinen Einfluss auf die Leistungsbewertung.</p>
+</div>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#f2f2f5;margin-bottom:5px">Datenschutzhinweis</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Welche Daten werden verarbeitet?</div>
+<p style="margin:0">Zur Teilnahme wird ein Spielname eingegeben. Trage dort nur deinen Vornamen ein – keinen Nachnamen; ein Fantasiename oder Spitzname ist ebenfalls möglich. Verarbeitet werden nur der Spielname, die Teamzuordnung und der Punktestand während des Spiels. Es gibt keine Registrierung, kein Tracking und keine Werbung.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wofür?</div>
+<p style="margin:0">Die Daten werden ausschließlich benötigt, um das Quiz gemeinsam auf mehreren Geräten zu spielen (Anzeige von Teams und Punkteständen).</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wo werden die Daten gespeichert?</div>
+<p style="margin:0 0 6px">Die Webseite wird über GitHub Pages (GitHub Inc., USA) bereitgestellt. Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse.</p>
+<p style="margin:0">Die Live-Synchronisation erfolgt über Google Firebase (Google Ireland Ltd.; Datenbankstandort: Europa). Dabei wird eine anonyme Kennung ohne Personenbezug erzeugt. Eine Übermittlung von Daten in die USA kann nicht ausgeschlossen werden.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wie lange?</div>
+<p style="margin:0">Die Spieldaten werden nach Ende der Unterrichtsstunde von der Lehrkraft gelöscht (Funktion „Lobby leeren“). Es findet keine dauerhafte Speicherung statt.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Rechtsgrundlage:</div>
+<p style="margin:0">Art. 6 Abs. 1 lit. e DSGVO in Verbindung mit § 31 Niedersächsisches Schulgesetz (Verarbeitung im Rahmen des Bildungsauftrags der Schule).</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Deine Rechte:</div>
+<p style="margin:0">Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner Daten. Wende dich dazu an die oben genannte Lehrkraft oder an die Datenschutzbeauftragte bzw. den Datenschutzbeauftragten der Schule: [Name/Kontakt]. Außerdem kannst du dich bei der Landesbeauftragten für den Datenschutz Niedersachsen beschweren.</p>
+</div>
+</div>
+</div>
+</div>
 </div>
 </div>
 </sc-if>
@@ -656,7 +712,10 @@ class Component extends DCLogic {
       gameRunning: !s.isHost && !!s.gameRunning,
       dataLoading: !s.isHost && !lfList().length,
       offline: s.conn==='local', reconnect: this.reconnect,
-      lobbyHint: !nameOk ? 'Zuerst Namen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
+      impressumOpen: !!s.impressum,
+      openImpressum: ()=>this.setState({impressum:true}),
+      closeImpressum: ()=>this.setState({impressum:false}),
+      lobbyHint: !nameOk ? 'Zuerst nur den Vornamen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
       t0: T[0].members, t1: T[1].members, t2: T[2].members, t3: T[3].members,
       c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
       join0: this.joinTeam(0), join1: this.joinTeam(1), join2: this.joinTeam(2), join3: this.joinTeam(3),
