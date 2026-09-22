@@ -1,0 +1,17 @@
+{
+  "rules": {
+    "rooms": {
+      "TW54": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "players": {
+          "$uid": {
+            "name": {
+              ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 20"
+            }
+          }
+        }
+      }
+    }
+  }
+}
