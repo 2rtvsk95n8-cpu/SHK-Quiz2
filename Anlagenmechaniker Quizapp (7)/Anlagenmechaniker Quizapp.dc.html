@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet"><script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script><script src="https://cdn.jsdelivr.net/npm/mqtt@5.10.1/dist/mqtt.min.js"></script><link rel="manifest" href="manifest.webmanifest"><script type="module" src="fragen.js"></script><style>
+html,body{margin:0;background:#101018;-webkit-font-smoothing:antialiased}
+a{color:#7dd3c0}a:hover{color:#a7e8da}
+@keyframes amqPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes amqBar{from{opacity:.6}to{opacity:1}}
+</style></helmet>
+<div style="min-height:100vh;background:radial-gradient(1200px 700px at 50% -10%,#1d2340 0%,#101018 60%);color:#f2f2f5;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 20px 40px;box-sizing:border-box">
+
+<div style="width:100%;max-width:1000px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px">
+<div style="display:flex;align-items:center;gap:12px">
+<div style="width:34px;height:34px;border-radius:9px;background:oklch(0.72 0.16 55);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1a1408;font-size:17px">A</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px">Anlagenmechaniker Quizapp</div>
+</div>
+<div style="display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:8px 14px;border-radius:999px">
+<span style="opacity:.55;font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Punkte</span><span>{{ score }}</span>
+</div>
+</div>
+
+<sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
+<div style="width:100%;max-width:1000px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:34px 32px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Anlagenmechaniker SHK</div>
+<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Wiederholungsfragen Lernfeld 1–15</h1>
+<p style="margin:0 0 22px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">Lernfeld wählen, dann {{ wanted }} Fragen daraus. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
+
+<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:10px">Lernfeld wählen</div>
+<sc-if value="{{ dataWaiting }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:20px;font-size:14px;color:rgba(242,242,245,.6);margin-bottom:22px">Fragen werden geladen …</div>
+</sc-if>
+<sc-if value="{{ dataReady }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:12px">
+<sc-for list="{{ lfOptions }}" as="l" hint-placeholder-count="15">
+<button onClick="{{ l.onClick }}" style="text-align:left;background:{{ l.bg }};border:1px solid {{ l.bc }};border-radius:11px;padding:11px 13px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:oklch(0.82 0.13 75)">{{ l.nr }}</span>
+<span style="font-size:13px;line-height:1.3">{{ l.titel }}</span>
+<span style="font-size:11.5px;opacity:.5">{{ l.count }}</span>
+</button>
+</sc-for>
+</div>
+<button onClick="{{ pickAll }}" style="width:100%;text-align:left;background:{{ allBg }};border:1px solid {{ allBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Alle Lernfelder gemischt</span>
+<span style="font-size:12px;opacity:.55">{{ allCount }}</span>
+</button>
+</sc-if>
+
+<div style="font-size:13.5px;color:rgba(242,242,245,.62);margin-bottom:16px">Gewählt: <span style="color:#f2f2f5;font-weight:600">{{ lfLabel }}</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Vorname" style="flex:1 1 200px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:15px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ start }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:oklch(0.78 0.16 55)">Alleine spielen</button>
+<button onClick="{{ openLobby }}" style="flex:0 0 auto;background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:15px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;opacity:{{ readyOpacity }};cursor:{{ readyCursor }}" style-hover="background:rgba(255,255,255,.08)">Raum leiten · Teams</button>
+<button onClick="{{ joinAsGuest }}" style="flex:0 0 auto;background:transparent;color:rgba(242,242,245,.7);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Als Spieler beitreten</button>
+</div>
+<div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:rgba(242,242,245,.5)">
+<span>{{ secs }} Sekunden pro Frage</span><span>Max. 1000 Punkte pro Frage</span><span>Bestleistung: {{ best }}</span>
+</div>
+<sc-if value="{{ lfChosen }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:10px;font-size:13px;color:rgba(242,242,245,.5)">{{ poolSize }} Fragen im gewählten Lernfeld verfügbar</div>
+</sc-if>
+</div>
+<div style="background:#fff;color:#101018;border-radius:20px;padding:24px;text-align:center">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px">Mit dem Handy beitreten</div>
+<div style="font-size:12.5px;color:rgba(16,16,24,.6);margin-bottom:16px">QR-Code scannen — Quiz öffnet sich im Browser</div>
+<canvas ref="{{ qrRef }}" width="220" height="220" style="width:220px;height:220px;max-width:100%;display:block;margin:0 auto;border-radius:10px"></canvas>
+<div style="margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.45;color:rgba(16,16,24,.55);word-break:break-all">{{ url }}</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLobby }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:24px;align-items:start;margin-bottom:22px">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:26px 28px">
+<div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin-bottom:14px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55">Lobby · {{ playerTotal }} Spieler</div>
+<div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:{{ connColor }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ connColor }}"></span>{{ connLabel }}</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px">
+<div>
+<div style="font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:4px">Raumcode</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:40px;letter-spacing:6px;line-height:1;color:oklch(0.80 0.15 75)">{{ room }}</div>
+</div>
+<div style="margin-left:auto;text-align:right">
+<div style="font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:4px">Lernfeld</div>
+<div style="font-size:14px;font-weight:600;max-width:30ch;text-wrap:pretty">{{ lfLabel }}</div>
+</div>
+</div>
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px;margin:0 0 16px;letter-spacing:-.4px">Teams bilden</h2>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<input value="{{ name }}" onChange="{{ onName }}" placeholder="Dein Vorname" style="flex:1 1 220px;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:14px 16px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:16px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<div style="flex:0 0 auto;font-size:13.5px;color:rgba(242,242,245,.6)">Mein Team: <span style="color:#f2f2f5;font-weight:600">{{ myTeamName }}</span></div>
+</div>
+<div style="margin-top:12px;font-size:13.5px;color:rgba(242,242,245,.6);text-wrap:pretty">{{ lobbyHint }}</div>
+</div>
+<div style="background:#fff;color:#101018;border-radius:18px;padding:20px;text-align:center">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:12px">Mitspieler einladen</div>
+<canvas ref="{{ lobbyQrRef }}" width="220" height="220" style="width:180px;height:180px;max-width:100%;display:block;margin:0 auto;border-radius:10px"></canvas>
+<div style="margin-top:10px;font-size:12px;color:rgba(16,16,24,.6);line-height:1.4">QR scannen – der Raum {{ room }} wird direkt geöffnet</div>
+<div style="margin-top:8px;font-family:ui-monospace,Menlo,monospace;font-size:9.5px;line-height:1.4;color:rgba(16,16,24,.45);word-break:break-all">{{ roomLink }}</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px">
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.55 0.18 25 / .55);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 1</span><span style="font-size:12px;opacity:.55">{{ c0 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t0 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join0 }}" style="background:oklch(0.55 0.18 25);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.12)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.52 0.15 250 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 2</span><span style="font-size:12px;opacity:.55">{{ c1 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t1 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join1 }}" style="background:oklch(0.52 0.15 250);color:#fff;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.12)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.58 0.13 165 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 3</span><span style="font-size:12px;opacity:.55">{{ c2 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t2 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join2 }}" style="background:oklch(0.58 0.13 165);color:#08150f;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.08)">Beitreten</button>
+</div>
+<div style="background:rgba(255,255,255,.05);border:1px solid oklch(0.74 0.15 75 / .6);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;min-height:210px">
+<div style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">Team 4</span><span style="font-size:12px;opacity:.55">{{ c3 }}</span></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:7px">
+<sc-for list="{{ t3 }}" as="p" hint-placeholder-count="0"><div style="font-size:14.5px;padding:7px 10px;border-radius:9px;background:rgba(255,255,255,.07);display:flex;justify-content:space-between;gap:8px"><span>{{ p.name }}</span><span style="opacity:.5">{{ p.score }}</span></div></sc-for>
+</div>
+<button onClick="{{ join3 }}" style="background:oklch(0.74 0.15 75);color:#1a1408;border:none;border-radius:10px;padding:11px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="filter:brightness(1.06)">Beitreten</button>
+</div>
+</div>
+
+<div style="margin-top:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ startTeamGame }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:15px 30px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Quiz für alle starten</button>
+</sc-if>
+<sc-if value="{{ isHost }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ resetLobby }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:15px 22px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Lobby leeren</button>
+</sc-if>
+<sc-if value="{{ isGuest }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.75)"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.80 0.15 75)"></span>Warten auf Start durch die Spielleitung</div>
+</sc-if>
+<sc-if value="{{ gameRunning }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:oklch(0.55 0.18 25 / .18);border:1px solid oklch(0.62 0.20 25 / .5);border-radius:12px;padding:15px 20px;font-size:14.5px;color:#f2f2f5"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.72 0.17 30)"></span>Eine Runde läuft bereits – du wirst bei der nächsten Runde mitgenommen.</div>
+</sc-if>
+<sc-if value="{{ offline }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;background:oklch(0.55 0.18 25 / .18);border:1px solid oklch(0.62 0.20 25 / .5);border-radius:12px;padding:13px 18px;font-size:14.5px;color:#f2f2f5">
+<span style="flex:1 1 260px;min-width:0;text-wrap:pretty">Keine Verbindung zu den Mitspielern – dieses Gerät spielt allein.</span>
+<button onClick="{{ reconnect }}" style="flex:0 0 auto;background:#f2f2f5;color:#101018;border:none;border-radius:10px;padding:10px 18px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:#fff">Erneut verbinden</button>
+</div>
+</sc-if>
+<sc-if value="{{ dataLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.7)">Fragen werden geladen …</div>
+</sc-if>
+<button onClick="{{ leaveLobby }}" style="background:transparent;color:rgba(242,242,245,.6);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Lobby verlassen</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPlay }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out">
+<sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">
+<sc-for list="{{ standings }}" as="t" hint-placeholder-count="0"><div style="flex:1 1 180px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 14px;display:flex;align-items:baseline;justify-content:space-between;gap:10px"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">{{ t.label }}</span><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:oklch(0.80 0.15 75)">{{ t.score }}</span></div></sc-for>
+</div>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 16px;font-size:13px;color:rgba(242,242,245,.6);margin-bottom:12px">
+<span style="white-space:nowrap">Frage {{ qNum }} / {{ total }}</span><span>{{ chapter }}</span>
+</div>
+<div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin-bottom:22px"><div style="height:100%;background:oklch(0.72 0.16 55);width:{{ progPct }}%;transition:width .3s ease"></div></div>
+
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:30px 30px 26px;margin-bottom:18px">
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:28px;line-height:1.22;margin:0;letter-spacing:-.4px;text-wrap:pretty">{{ question }}</h2>
+<div style="margin-top:22px;display:flex;align-items:center;gap:14px">
+<div style="flex:1;height:10px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;background:{{ timeColor }};width:{{ timePct }}%;transition:width .12s linear"></div></div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;min-width:34px;text-align:right">{{ timeLeft }}</div>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px">
+<button onClick="{{ pick0 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.55 0.18 25);border:none;border-radius:16px;padding:22px 22px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring0 }}" style-hover="filter:brightness(1.1)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#fff;clip-path:polygon(50% 0,100% 100%,0 100%)"></span><span style="flex:1;min-width:0">{{ o0 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim0 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick1 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.52 0.15 250);border:none;border-radius:16px;padding:22px 22px;color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring1 }}" style-hover="filter:brightness(1.12)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#fff;transform:rotate(45deg)"></span><span style="flex:1;min-width:0">{{ o1 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim1 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick2 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.58 0.13 165);border:none;border-radius:16px;padding:22px 22px;color:#08150f;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring2 }}" style-hover="filter:brightness(1.08)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#08150f;border-radius:50%"></span><span style="flex:1;min-width:0">{{ o2 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim2 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+<button onClick="{{ pick3 }}" style="position:relative;overflow:hidden;text-align:left;display:flex;align-items:center;gap:16px;background:oklch(0.74 0.15 75);border:none;border-radius:16px;padding:22px 22px;color:#1a1408;font-family:'IBM Plex Sans',sans-serif;font-weight:500;font-size:17px;line-height:1.35;cursor:pointer;min-height:96px;box-shadow:{{ ring3 }}" style-hover="filter:brightness(1.06)">
+<span style="flex:0 0 26px;width:26px;height:26px;background:#1a1408;border-radius:4px"></span><span style="flex:1;min-width:0">{{ o3 }}</span>
+<span style="position:absolute;inset:0;background:#101018;opacity:{{ dim3 }};pointer-events:none;transition:opacity .2s"></span>
+</button>
+</div>
+
+<sc-if value="{{ revealed }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:18px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:22px 24px;display:flex;flex-wrap:wrap;gap:18px;align-items:center;justify-content:space-between;animation:amqPop .2s ease-out">
+<div style="flex:1 1 380px;min-width:0">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;color:{{ verdictColor }};margin-bottom:6px">{{ verdict }}</div>
+<div style="font-size:14.5px;line-height:1.5;color:rgba(242,242,245,.72);text-wrap:pretty">{{ explain }}</div>
+</div>
+<button onClick="{{ next }}" style="flex:0 0 auto;background:#f2f2f5;color:#101018;border:none;border-radius:12px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:#fff">{{ nextLabel }}</button>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDone }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:640px;text-align:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:44px 34px;animation:amqPop .25s ease-out">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:12px">Ergebnis {{ name }}</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:72px;line-height:1;letter-spacing:-2px;color:oklch(0.78 0.16 55)">{{ score }}</div>
+<div style="margin-top:10px;font-size:17px;color:rgba(242,242,245,.8)">{{ correctCount }} von {{ total }} Fragen richtig</div>
+<div style="margin-top:6px;font-size:15px;color:rgba(242,242,245,.55)">{{ grade }}</div>
+<sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:26px;display:flex;flex-direction:column;gap:8px;text-align:left">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55">Teamwertung</div>
+<sc-for list="{{ standings }}" as="t" hint-placeholder-count="0"><div style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px"><span style="min-width:0"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">{{ t.label }}</span><span style="display:block;font-size:12.5px;color:rgba(242,242,245,.5)">{{ t.members }}</span></span><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px;color:oklch(0.80 0.15 75)">{{ t.score }}</span></div></sc-for>
+</div>
+</sc-if>
+<div style="margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+<button onClick="{{ restart }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 28px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Nochmal spielen</button>
+<button onClick="{{ toJoin }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.25);border-radius:12px;padding:14px 24px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Zur Startseite</button>
+</div>
+</div>
+</sc-if>
+
+<div style="width:100%;max-width:1000px;margin-top:auto;padding-top:28px;display:flex;justify-content:flex-end">
+<button onClick="{{ openImpressum }}" style="background:transparent;border:none;padding:4px 2px;color:rgba(242,242,245,.35);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline" style-hover="color:rgba(242,242,245,.7)">Impressum</button>
+</div>
+
+<sc-if value="{{ impressumOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(10,10,16,.72);display:flex;align-items:flex-start;justify-content:center;padding:28px 18px;overflow:auto;z-index:60">
+<div style="width:100%;max-width:720px;background:#16161f;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:32px 34px 36px;box-shadow:0 24px 60px rgba(0,0,0,.5)">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px">
+<h2 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:24px;margin:0;letter-spacing:-.3px">Impressum</h2>
+<button onClick="{{ closeImpressum }}" style="flex:0 0 auto;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:8px 14px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer" style-hover="background:rgba(255,255,255,.16)">Schließen</button>
+</div>
+<div style="font-size:13.5px;line-height:1.6;color:rgba(242,242,245,.78);display:flex;flex-direction:column;gap:16px;text-wrap:pretty">
+<p style="margin:0">Diese Anwendung ist ein nichtkommerzielles Unterrichtsmaterial für den Einsatz im Fachunterricht Anlagenmechaniker SHK an den Berufsbildenden Schulen Ammerland.</p>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:#f2f2f5;margin-bottom:4px">Verantwortlich für den Inhalt:</div>
+<p style="margin:0">Christian Hamjediers, Lehrkraft<br>Berufsbildende Schulen Ammerland<br>Elmendorfer Straße 59, 26160 Bad Zwischenahn</p>
+</div>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#f2f2f5;margin-bottom:5px">Hinweis zur Nutzung</div>
+<p style="margin:0">Die Anwendung dient ausschließlich der Wiederholung und Übung im Unterricht. Die Fragen wurden sorgfältig erstellt, können aber Fehler enthalten und von Fachbüchern oder aktuellen Normen abweichen. Maßgeblich sind die im Unterricht verwendeten Lehrmaterialien, die geltenden Regelwerke und die Hinweise der Lehrkraft. Eine Gewähr für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte wird nicht übernommen. Die Ergebnisse im Quiz haben keinen Einfluss auf die Leistungsbewertung.</p>
+</div>
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;color:#f2f2f5;margin-bottom:5px">Datenschutzhinweis</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Welche Daten werden verarbeitet?</div>
+<p style="margin:0">Zur Teilnahme wird ein Spielname eingegeben. Trage dort nur deinen Vornamen ein – keinen Nachnamen; ein Fantasiename oder Spitzname ist ebenfalls möglich. Verarbeitet werden nur der Spielname, die Teamzuordnung und der Punktestand während des Spiels. Es gibt keine Registrierung, kein Tracking und keine Werbung.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wofür?</div>
+<p style="margin:0">Die Daten werden ausschließlich benötigt, um das Quiz gemeinsam auf mehreren Geräten zu spielen (Anzeige von Teams und Punkteständen).</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wo werden die Daten gespeichert?</div>
+<p style="margin:0 0 6px">Die Webseite wird über GitHub Pages (GitHub Inc., USA) bereitgestellt. Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse.</p>
+<p style="margin:0">Die Live-Synchronisation erfolgt über Google Firebase (Google Ireland Ltd.; Datenbankstandort: Europa). Dabei wird eine anonyme Kennung ohne Personenbezug erzeugt. Eine Übermittlung von Daten in die USA kann nicht ausgeschlossen werden.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Wie lange?</div>
+<p style="margin:0">Die Spieldaten werden nach Ende der Unterrichtsstunde von der Lehrkraft gelöscht (Funktion „Lobby leeren“). Es findet keine dauerhafte Speicherung statt.</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Rechtsgrundlage:</div>
+<p style="margin:0">Art. 6 Abs. 1 lit. e DSGVO in Verbindung mit § 31 Niedersächsisches Schulgesetz (Verarbeitung im Rahmen des Bildungsauftrags der Schule).</p>
+</div>
+<div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Deine Rechte:</div>
+<p style="margin:0">Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung deiner Daten. Wende dich dazu an die oben genannte Lehrkraft oder an die Datenschutzbeauftragte bzw. den Datenschutzbeauftragten der Schule: [Name/Kontakt]. Außerdem kannst du dich bei der Landesbeauftragten für den Datenschutz Niedersachsen beschweren.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#101018"/><rect x="30" y="30" width="40" height="40" rx="10" fill="oklch(0.72 0.16 55)"/><text x="50" y="62" font-family="sans-serif" font-weight="700" font-size="28" text-anchor="middle" fill="#1a1408">A</text></svg></template>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;questionCount&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:20,&quot;min&quot;:5,&quot;max&quot;:50,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;timerSeconds&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:25,&quot;min&quot;:10,&quot;max&quot;:60,&quot;step&quot;:5,&quot;unit&quot;:&quot;s&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Quiz&quot;},&quot;shuffleQuestions&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Quiz&quot;}}">
+const LKEY = 'amq-lobby-v1';
+const TOPIC = 'amq_tw54_quiz';
+const ROOM = 'TW54';
+
+const BROKERS = ['wss://broker.emqx.io:8084/mqtt','wss://broker.hivemq.com:8884/mqtt','wss://test.mosquitto.org:8081/mqtt'];
+const TEAM_NAMES = ['Team 1','Team 2','Team 3','Team 4'];
+const MAX_PER_TEAM = 4;
+function lread(key){ try { return JSON.parse(localStorage.getItem(key || LKEY) || '{}') || {}; } catch(e){ return {}; } }
+function lwrite(next, key){ try { localStorage.setItem(key || LKEY, JSON.stringify(next)); } catch(e){} }
+function lfList(){ const d = (typeof window!=='undefined') ? window.FRAGEN : null; return (d && d.lernfelder) ? d.lernfelder : []; }
+function poolFor(nr){
+  const sel = nr==='all' ? lfList() : lfList().filter(x=>x.nr===nr);
+  const out = [];
+  sel.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
+    out.push({c:'LF '+lf.nr+' · '+(f.thema||lf.titel), q:f.frage, o:f.antworten, a:f.korrekt, e:f.erklaerung});
+  }); });
+  return out;
+}
+function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+
+class Component extends DCLogic {
+  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off', lf:null};
+  qrRef = React.createRef();
+  lobbyQrRef = React.createRef();
+  netPlayers = {};
+  netGame = null;
+
+  componentDidMount(){
+    let best = 0;
+    try { best = parseInt(localStorage.getItem('amq-best')||'0',10)||0; } catch(e){}
+    const url = (typeof location!=='undefined') ? location.href.split('#')[0] : '';
+    const myId = 'p' + Math.random().toString(36).slice(2,9);
+    const hash = (typeof location!=='undefined') ? location.hash : '';
+    const auto = /(^|[#&])join($|[&=])/i.test(hash||'') || /r=/i.test(hash||'');
+    this.setState({best, url, myId}, ()=>{
+      this.drawQr();
+      if(auto) this.enterRoom(ROOM, false);
+    });
+    try { this._ch = new BroadcastChannel('amq-lobby'); this._ch.onmessage = ()=>this.syncLobby(); } catch(e){}
+    this._onStorage = e => { if(!e || e.key===LKEY) this.syncLobby(); };
+    window.addEventListener('storage', this._onStorage);
+    this._poll = setInterval(()=>{ this.heartbeat(); this.syncLobby(); }, 1800);
+    this.awaitQuestions();
+  }
+  awaitQuestions(){
+    if(lfList().length){ this.setState({dataReady:true}); return; }
+    let tries = 0;
+    import('./fragen.js').then(m=>{
+      const d = m.FRAGEN || m.default;
+      if(d && d.lernfelder && !window.FRAGEN) window.FRAGEN = d;
+      if(lfList().length){ clearInterval(this._dataPoll); this.setState({dataReady:true}); }
+    }).catch(()=>{});
+    this._dataPoll = setInterval(()=>{
+      tries++;
+      if(lfList().length){ clearInterval(this._dataPoll); this.setState({dataReady:true}); }
+      else if(tries > 120) clearInterval(this._dataPoll);
+      else this.forceUpdate();
+    }, 120);
+  }
+  componentDidUpdate(){ this.drawQr(); }
+
+  /* ---- Transport: öffentlicher MQTT-Broker, Fallback = lokaler Speicher ---- */
+  topic(sub){ return TOPIC + '/' + this.state.room + (sub ? '/' + sub : ''); }
+  lk(){ return this.state.room ? LKEY + ':' + this.state.room : LKEY; }
+  async fbConfig(){
+    if(this._cfg !== undefined) return this._cfg;
+    let c = (typeof window !== 'undefined' && window.AMQ_FIREBASE) ? window.AMQ_FIREBASE : null;
+    if(!c){
+      try {
+        const m = await import('./firebase-config.js');
+        c = m.firebaseConfig || m.default || m.FIREBASE || null;
+      } catch(e){ c = null; }
+    }
+    this._cfg = (c && c.databaseURL) ? c : null;
+    return this._cfg;
+  }
+  loadScript(src){
+    return new Promise(res=>{
+      if(document.querySelector('script[data-amq="'+src+'"]')) return res(true);
+      const s = document.createElement('script');
+      s.src = src; s.dataset.amq = src;
+      s.onload = ()=>res(true); s.onerror = ()=>res(false);
+      document.head.appendChild(s);
+    });
+  }
+  async connectFirebase(room){
+    try {
+      const cfg = await this.fbConfig();
+      if(!cfg) return false;
+      if(!window.firebase || !window.firebase.database){
+        const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+        const ok = await Promise.all([
+          this.loadScript(base + 'firebase-app-compat.js'),
+          this.loadScript(base + 'firebase-auth-compat.js'),
+          this.loadScript(base + 'firebase-database-compat.js')
+        ]);
+        if(ok.some(x=>!x) || !window.firebase) return false;
+      }
+      if(!window.firebase.apps.length) window.firebase.initializeApp(cfg);
+      try { await window.firebase.auth().signInAnonymously(); } catch(e){ return false; }
+      const uid = (window.firebase.auth().currentUser||{}).uid;
+      if(uid) this.setState({myId: uid});
+      const db = window.firebase.database();
+      const ref = db.ref('rooms/' + room);
+      const meId = uid || this.state.myId;
+      this._fb = {ref, me: ref.child('players/' + meId)};
+      try { await this._fb.me.onDisconnect().remove(); } catch(e){}
+      if(this.state.isHost){ try { await ref.child('game').remove(); } catch(e){} }
+      ref.on('value', snap=>{
+        const v = snap.val() || {};
+        this.netPlayers = {};
+        Object.keys(v.players||{}).forEach(id=>{ this.netPlayers[id] = Object.assign({id}, v.players[id]); });
+        const rst = v.reset && v.reset.at;
+        if(rst && rst > (this._resetAt||0)){ this.applyReset(rst); return; }
+        this.netGame = (v.game && (v.game.at||0) >= (this._resetAt||0)) ? v.game : null;
+        this.syncLobby();
+      }, ()=>{ this.setState({conn:'local'}); });
+      db.ref('.info/connected').on('value', s=>{
+        this.setState({conn: s.val() ? 'online' : 'connecting'});
+        if(s.val()) this.publishMe();
+      });
+      return true;
+    } catch(e){ return false; }
+  }
+  applyReset(at){
+    this._resetAt = at; this._lobbyAt = at;
+    this.netPlayers = {}; this.netGame = null; this._anyGame = null;
+    if(this.state.isHost) this.clearRetained('game');
+    const st = lread(this.lk()); if(st.players) delete st.players[this.state.myId];
+    st.game = null; lwrite(st, this.lk()); this.ping();
+    clearInterval(this._iv);
+    this.setState({players:{}, seed:0, score:0, correct:0, picked:null, screen:'lobby'});
+  }
+  async connect(room){
+    this.closeNet();
+    this.netPlayers = {}; this.netGame = null;
+    this.setState({conn:'connecting'});
+    if(await this.connectFirebase(room)) return;
+    if(!window.mqtt){ this.setState({conn:'local'}); return; }
+    this.setState({conn:'connecting'});
+    const attempt = i => {
+      if(i >= BROKERS.length){ this.setState({conn:'local'}); return; }
+      let live = false, c;
+      try {
+        c = window.mqtt.connect(BROKERS[i], {clientId:'amq_'+this.state.myId+'_'+Math.random().toString(36).slice(2,6), clean:true, keepalive:30, connectTimeout:6000, reconnectPeriod:0});
+      } catch(e){ attempt(i+1); return; }
+      c.on('connect', ()=>{
+        live = true; this._net = c;
+        this.setState({conn:'online'});
+        c.subscribe(TOPIC + '/' + room + '/#', {qos:0});
+        if(this.state.isHost){
+          this._anyGame = null; this.netGame = null;
+          this.clearRetained('game');
+          this.setState({gameRunning:false});
+        }
+        this.publishMe();
+      });
+      c.on('message', (t, payload)=>{
+          const raw = payload.toString();
+        if(!raw){ if(/\/game$/.test(t)){ this.netGame = null; this._anyGame = null; this.syncLobby(); } return; }
+        let d = null; try { d = JSON.parse(raw); } catch(e){ return; }
+        if(/\/reset$/.test(t)){ if(d && d.at > (this._resetAt||0)) this.applyReset(d.at); return; }
+        if(/\/game$/.test(t)){ if(d && (d.at||0) >= (this._resetAt||0)){ this.netGame = d; this._anyGame = d; } }
+        else if(d && d.id){ if((d.ts||0) < (this._resetAt||0)) return; this.netPlayers[d.id] = d; }
+        this.syncLobby();
+      });
+      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); else if(this._net===c){ this._net = null; this.setState({conn:'connecting'}); } });
+      c.on('close', ()=>{
+        if(!live) attempt(i+1);
+        else if(this._net===c){ this._net = null; this.setState({conn:'connecting'}); }
+      });
+    };
+    this._attempt = attempt;
+    attempt(0);
+    clearInterval(this._retryNet);
+    this._retryNet = setInterval(()=>{
+      const s = this.state;
+      if(s.mode!=='team' || (s.screen!=='lobby' && s.screen!=='play' && s.screen!=='done')){ return; }
+      if(s.conn==='online' && this._net) return;
+      if(this._fb) return;
+      this._attempt && this._attempt(0);
+    }, 8000);
+  }
+  reconnect = ()=>{ this.setState({conn:'connecting'}, ()=>this.connect(this.state.room)); };
+  closeNet(){
+    clearInterval(this._retryNet);
+    try { if(this._net){ this._net.end(true); this._net = null; } } catch(e){}
+    try { if(this._fb){ this._fb.ref.off(); this._fb.me.remove(); this._fb = null; } } catch(e){}
+  }
+  pub(sub, data){
+    try { if(this._fb) this._fb.ref.child(sub.indexOf('p/')===0 ? 'players/'+sub.slice(2) : sub).set(data); } catch(e){}
+    try { if(this._net) this._net.publish(this.topic(sub), JSON.stringify(data), {qos:0, retain:true}); } catch(e){}
+  }
+  clearRetained(sub){
+    try { if(this._net) this._net.publish(this.topic(sub), '', {qos:0, retain:true}); } catch(e){}
+  }
+  publishMe(){
+    const me = (lread(this.lk()).players||{})[this.state.myId];
+    if(!me) return;
+    const rec = Object.assign({id:this.state.myId}, me, {score:this.state.score||0, ts:Date.now()});
+    this.netPlayers[this.state.myId] = rec;
+    this.pub('p/'+this.state.myId, rec);
+  }
+
+  ping(){ try { if(this._ch) this._ch.postMessage(1); } catch(e){} }
+  mutate(fn){ const st = lread(this.lk()); const next = fn(st) || st; lwrite(next, this.lk()); this.ping(); this.syncLobby(); }
+  heartbeat(){
+    if(this.state.mode!=='team' || !this.state.myId) return;
+    const me = (lread(this.lk()).players||{})[this.state.myId];
+    if(!me) return;
+    this.mutate(st=>{ st.players = st.players||{}; if(st.players[this.state.myId]){ st.players[this.state.myId].ts = Date.now(); st.players[this.state.myId].score = this.state.score; } return st; });
+    this.publishMe();
+  }
+  syncLobby(){
+    const st = lread(this.lk()); const now = Date.now();
+    const merged = {};
+    Object.keys(this.netPlayers).forEach(id=>{ merged[id] = this.netPlayers[id]; });
+    Object.keys(st.players||{}).forEach(id=>{ merged[id] = Object.assign({}, merged[id], st.players[id], {id}); });
+    const players = {};
+    Object.keys(merged).forEach(id=>{ const p = merged[id]; if(p && p.team!=null && now - (p.ts||0) < 12000) players[id] = p; });
+    this.setState({players});
+    const any = [st.game, this._anyGame].filter(g=>g && g.seed).sort((a,b)=>(b.at||0)-(a.at||0))[0];
+    const running = !!(any && (any.at||0) <= (this._lobbyAt||0) && now - (any.at||0) < 1800000);
+    if(running !== this.state.gameRunning) this.setState({gameRunning:running});
+    const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
+    const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
+    if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
+      const lf = (game.lf === 'all' || typeof game.lf === 'number') ? game.lf : this.state.lf;
+      this.setState({lf}, ()=>this.beginGame(game.seed));
+    }
+  }
+
+  enterRoom(room, isHost){
+    this._resetAt = 0;
+    this._lobbyAt = Date.now();
+    this.netGame = null;
+    if(isHost) this._anyGame = null;
+    if(isHost) lwrite({players:{}}, LKEY + ':' + room);
+    else { const st = lread(LKEY + ':' + room); st.game = null; lwrite(st, LKEY + ':' + room); }
+    this.setState({mode:'team', screen:'lobby', room, roomInput:room, score:0, correct:0, seed:0, players:{}, isHost:!!isHost}, ()=>this.connect(room));
+  }
+  joinAsGuest = ()=>{ this.enterRoom(ROOM, false); };
+  backToLobby = ()=>{
+    this._lobbyAt = Date.now();
+    this.netGame = null;
+    const st = lread(this.lk()); st.game = null; lwrite(st, this.lk());
+    if(this.state.isHost){
+      this._anyGame = null;
+      this.clearRetained('game');
+      try { if(this._fb) this._fb.ref.child('game').remove(); } catch(e){}
+    }
+    this.setState({screen:'lobby', seed:0, score:0, correct:0, picked:null, gameRunning:false});
+  };
+  joinTeam = t => ()=>{
+    const name = (this.state.name||'').trim();
+    if(!name) return;
+    const p = this.state.players || {};
+    const inTeam = Object.keys(p).filter(id=>p[id].team===t && id!==this.state.myId).length;
+    if(inTeam >= MAX_PER_TEAM) return;
+    this.mutate(s=>{ s.players = s.players||{}; s.players[this.state.myId] = {name, team:t, score:this.state.score||0, ts:Date.now()}; return s; });
+    this.publishMe();
+  };
+  leaveLobby = ()=>{
+    this.clearRetained('p/'+this.state.myId);
+    if(this.state.isHost){ this.clearRetained('game'); this._anyGame = null; }
+    this.pub('p/'+this.state.myId, {id:this.state.myId, team:null, ts:0});
+    this.mutate(s=>{ if(s.players) delete s.players[this.state.myId]; return s; });
+    this.closeNet();
+    clearInterval(this._iv);
+    this.netPlayers = {}; this.netGame = null;
+    this.setState({screen:'join', mode:'solo', seed:0, room:'', conn:'off', players:{}});
+  };
+  openLobby = ()=>{ if(this.state.lf == null) return; this.enterRoom(ROOM, true); };
+  resetLobby = ()=>{
+    if(!this.state.isHost) return;
+    const at = Date.now();
+    this.pub('reset', {at});
+    this.applyReset(at);
+  };
+  startTeamGame = ()=>{
+    if(this.state.mode==='team' && !this.state.isHost) return;
+    if(!this.pool.length) return;
+    const seed = Date.now() % 2147483647;
+    const game = {seed, at:Date.now(), lf:this.state.lf};
+    this.netGame = game;
+    this.mutate(s=>{ s.game = game; return s; });
+    this.pub('game', game);
+    this.beginGame(seed);
+  };
+  beginGame(seed){
+    if(!this.pool.length){
+      this.setState({screen:'lobby'});
+      if(!this._retry){ this._retry = setTimeout(()=>{ this._retry = null; if(this.state.screen==='lobby') this.beginGame(seed); }, 500); }
+      return;
+    }
+    clearTimeout(this._retry); this._retry = null;
+    this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null}, ()=>{ this.tick(); this.publishMe(); });
+    this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
+  }
+  drawQr(){
+    const pairs = [[this.qrRef.current, this.state.url], [this.lobbyQrRef.current, this.roomLink()]];
+    pairs.forEach(([c, value])=>{
+      if(!c || !window.QRious || !value || c.dataset.done === value) return;
+      c.dataset.done = value;
+      try { new window.QRious({element:c, value, size:220, padding:6, background:'#ffffff', foreground:'#101018', level:'M'}); } catch(e){}
+    });
+  }
+  roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
+  componentWillUnmount(){
+    clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll);
+    clearInterval(this._retryNet); clearTimeout(this._retry); this.closeNet();
+    window.removeEventListener('storage', this._onStorage);
+    try { if(this._ch) this._ch.close(); } catch(e){}
+  }
+
+  get secs(){ return Math.round(this.props.timerSeconds ?? 25); }
+  get pool(){ return poolFor(this.state.lf); }
+  get count(){ return Math.max(1, Math.min(Math.round(this.props.questionCount ?? 20), this.pool.length)); }
+
+  shuffle(a, rnd){ const r=a.slice(); const f = rnd || Math.random; for(let i=r.length-1;i>0;i--){const j=Math.floor(f()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
+
+  buildDeck(seed){
+    const rnd = seed ? mulberry32(seed) : null;
+    const all = this.pool;
+    const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(all, rnd) : all.slice();
+    return picked.slice(0, this.count).map(item=>{
+      const idxs = this.shuffle([0,1,2,3], rnd);
+      return {c:item.c, q:item.q, e:item.e, o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
+    });
+  }
+
+  start = ()=>{
+    if(this.state.lf == null || !this.pool.length) return;
+    this.setState({mode:'solo', screen:'play', deck:this.buildDeck(), idx:0, score:0, streak:0, correct:0, picked:null}, this.tick);
+  };
+  pickLf = nr => ()=>{ if(lfList().length) this.setState({lf:nr}); };
+  tick = ()=>{
+    clearInterval(this._iv);
+    this._deadline = Date.now() + this.secs*1000;
+    this.setState({t:this.secs*10, picked:null});
+    this._iv = setInterval(()=>{
+      if(this.state.picked !== null){ clearInterval(this._iv); return; }
+      const left = Math.max(0, this._deadline - Date.now());
+      if(left <= 0){ clearInterval(this._iv); this.setState({t:0, picked:-1, streak:0}); }
+      else this.setState({t: Math.ceil(left/100)});
+    },100);
+  };
+  answer = i => ()=>{
+    if(this.state.picked!==null) return;
+    clearInterval(this._iv);
+    const q = this.state.deck[this.state.idx];
+    const ok = i===q.a;
+    this.setState(s=>{
+      const streak = ok ? s.streak+1 : 0;
+      const pts = ok ? Math.round(600 + 400*(s.t/(this.secs*10))) + Math.min(streak-1,5)*50 : 0;
+      return {picked:i, streak, score:s.score+pts, correct:s.correct+(ok?1:0), gain:pts};
+    });
+    if(this.state.mode==='team') setTimeout(()=>this.heartbeat(), 30);
+  };
+  next = ()=>{
+    if(this.state.idx+1 >= this.state.deck.length){
+      const best = Math.max(this.state.best, this.state.score);
+      try { localStorage.setItem('amq-best', String(best)); } catch(e){}
+      if(this.state.mode==='team') this.heartbeat();
+      this.setState({screen:'done', best});
+    } else {
+      this.setState(s=>({idx:s.idx+1}), this.tick);
+    }
+  };
+
+  renderVals(){
+    const s = this.state, q = s.deck[s.idx];
+    const revealed = s.picked !== null;
+    const ok = revealed && s.picked === (q && q.a);
+    const total = this.count;
+    const ringOf = i => (revealed && q && i===q.a) ? '0 0 0 4px #f2f2f5' : 'none';
+    const dimOf = i => (revealed && q && i!==q.a && i!==s.picked) ? 0.55 : 0;
+    const grade = s.correct/total >= 0.9 ? 'Sehr gut – prüfungsreif.' : s.correct/total >= 0.7 ? 'Gut. Ein paar Regelwerte noch einmal ansehen.' : s.correct/total >= 0.5 ? 'Solide Basis, Kapitel 5.4 nochmal durcharbeiten.' : 'Noch viel Luft – Musterlösung wiederholen.';
+    const ids = Object.keys(s.players||{});
+    const teamOf = t => ids.filter(id=>s.players[id].team===t).map(id=>({name:s.players[id].name, score:s.players[id].score||0, me: id===s.myId}));
+    const T = [0,1,2,3].map(t=>{ const m = teamOf(t); return {name:TEAM_NAMES[t], members:m, score:m.reduce((a,b)=>a+b.score,0), count:m.length}; });
+    const standings = T.filter(t=>t.count>0).slice().sort((a,b)=>b.score-a.score).map((t,i)=>({label:(i+1)+'. '+t.name, score:t.score, members:t.members.map(m=>m.name).join(', ')}));
+    const mine = (s.players||{})[s.myId];
+    const nameOk = !!(s.name||'').trim();
+    return {
+      isJoin: s.screen==='join', isPlay: s.screen==='play', isDone: s.screen==='done',
+      isLobby: s.screen==='lobby', isTeam: s.mode==='team', openLobby: this.openLobby,
+      leaveLobby: this.leaveLobby, resetLobby: this.resetLobby, startTeamGame: this.startTeamGame,
+      lobbyQrRef: this.lobbyQrRef, nameOk, playerTotal: ids.length,
+      room: s.room, roomLink: this.roomLink(), joinAsGuest: this.joinAsGuest,
+      lfOptions: lfList().map(l=>({
+        nr:'LF '+l.nr, titel:l.titel, count:(l.fragen||[]).length+' Fragen',
+        bg: s.lf===l.nr ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
+        bc: s.lf===l.nr ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
+        onClick: this.pickLf(l.nr)
+      })),
+      allBg: s.lf==='all' ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
+      allBc: s.lf==='all' ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
+      pickAll: this.pickLf('all'),
+      allCount: poolFor('all').length + ' Fragen',
+      lfChosen: s.lf != null,
+      dataReady: !!lfList().length,
+      dataWaiting: !lfList().length,
+      readyOpacity: (s.lf != null && this.pool.length) ? 1 : 0.42,
+      readyCursor: (s.lf != null && this.pool.length) ? 'pointer' : 'not-allowed',
+      lfLabel: s.lf === 'all' ? 'Alle Lernfelder' : (s.lf != null ? ('LF ' + s.lf + ' · ' + ((lfList().find(l=>l.nr===s.lf)||{}).titel||'')) : 'Noch kein Lernfeld gewählt'),
+      poolSize: this.pool.length,
+      wanted: Math.round(this.props.questionCount ?? 20),
+      connLabel: s.conn==='online' ? 'Online verbunden' : s.conn==='connecting' ? 'Verbinde…' : 'Offline – nur dieses Gerät',
+      connColor: s.conn==='online' ? 'oklch(0.80 0.15 160)' : s.conn==='connecting' ? 'oklch(0.80 0.15 75)' : 'oklch(0.72 0.17 30)',
+      myTeamName: mine && mine.team!=null ? TEAM_NAMES[mine.team] : '—',
+      canStart: ids.length>0 && !!mine && mine.team!=null,
+      isHost: !!s.isHost, isGuest: !s.isHost && !s.gameRunning,
+      gameRunning: !s.isHost && !!s.gameRunning,
+      dataLoading: !s.isHost && !lfList().length,
+      offline: s.conn==='local', reconnect: this.reconnect,
+      impressumOpen: !!s.impressum,
+      openImpressum: ()=>this.setState({impressum:true}),
+      closeImpressum: ()=>this.setState({impressum:false}),
+      lobbyHint: !nameOk ? 'Zuerst nur den Vornamen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
+      t0: T[0].members, t1: T[1].members, t2: T[2].members, t3: T[3].members,
+      c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
+      join0: this.joinTeam(0), join1: this.joinTeam(1), join2: this.joinTeam(2), join3: this.joinTeam(3),
+      standings,
+      score: s.score, total, secs: this.secs, best: s.best, url: s.url, qrRef: this.qrRef,
+      name: s.name, onName: e=>this.setState({name:e.target.value}),
+      start: this.start, restart: s.mode==='team' ? this.backToLobby : this.start,
+      toJoin: s.mode==='team' ? this.leaveLobby : ()=>this.setState({screen:'join'}),
+      qNum: s.idx+1, progPct: Math.round(((s.idx + (revealed?1:0))/total)*100),
+      chapter: q ? q.c : '', question: q ? q.q : '',
+      o0: q?q.o[0]:'', o1: q?q.o[1]:'', o2: q?q.o[2]:'', o3: q?q.o[3]:'',
+      pick0: this.answer(0), pick1: this.answer(1), pick2: this.answer(2), pick3: this.answer(3),
+      ring0: ringOf(0), ring1: ringOf(1), ring2: ringOf(2), ring3: ringOf(3),
+      dim0: dimOf(0), dim1: dimOf(1), dim2: dimOf(2), dim3: dimOf(3),
+      timeLeft: Math.ceil(s.t/10), timePct: Math.round((s.t/(this.secs*10))*100),
+      timeColor: s.t <= this.secs*3 ? 'oklch(0.62 0.20 25)' : 'oklch(0.78 0.16 55)',
+      revealed,
+      verdict: s.picked===-1 ? 'Zeit abgelaufen' : ok ? ('Richtig · +' + (s.gain||0) + ' Punkte') : 'Leider falsch',
+      verdictColor: ok ? 'oklch(0.80 0.15 160)' : 'oklch(0.72 0.17 30)',
+      explain: q ? q.e : '',
+      nextLabel: s.idx+1 >= total ? 'Ergebnis' : 'Weiter',
+      next: this.next, correctCount: s.correct, grade
+    };
+  }
+}
+</script>
+</body>
+</html>
