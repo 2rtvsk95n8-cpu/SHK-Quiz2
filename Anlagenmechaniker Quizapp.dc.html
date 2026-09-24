@@ -166,6 +166,74 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 </div>
 </sc-if>
 
+<sc-if value="{{ isMonitor }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out;display:flex;flex-direction:column;gap:18px">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px 26px;display:flex;flex-wrap:wrap;gap:14px 20px;align-items:center;justify-content:space-between">
+<div style="min-width:0">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:6px">Spielleitung · Live-Übersicht</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:-.3px">{{ lfLabel }}</div>
+<div style="margin-top:4px;font-size:14px;color:rgba(242,242,245,.65)">{{ doneLabel }}</div>
+</div>
+<button onClick="{{ endRound }}" style="flex:0 0 auto;background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 26px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Runde beenden · zur Lobby</button>
+</div>
+
+<sc-if value="{{ allDone }}" hint-placeholder-val="{{ false }}">
+<div style="background:oklch(0.72 0.16 155 / .15);border:1px solid oklch(0.72 0.16 155 / .5);border-radius:12px;padding:13px 18px;font-size:14.5px">Alle Spieler sind fertig. Endstand siehe unten – mit „Runde beenden“ geht es zurück in die Lobby.</div>
+</sc-if>
+
+<div style="display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:rgba(242,242,245,.6)">
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:oklch(0.72 0.16 155)"></span>richtig</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:oklch(0.62 0.20 25)"></span>falsch</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:oklch(0.78 0.14 75)"></span>Zeit abgelaufen</span>
+<span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(255,255,255,.12)"></span>offen</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:14px">
+<sc-for list="{{ monitorTeams }}" as="t" hint-placeholder-count="2">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-left:4px solid {{ t.color }};border-radius:14px;padding:16px 20px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:10px">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px">{{ t.rank }} {{ t.name }}</span>
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;color:oklch(0.80 0.15 75)">{{ t.scoreLabel }}</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<sc-for list="{{ t.members }}" as="m" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:minmax(110px,160px) minmax(0,1fr) auto;gap:8px 16px;align-items:center">
+<div style="min-width:0">
+<div style="font-weight:600;font-size:14.5px;overflow:hidden;text-overflow:ellipsis">{{ m.name }}</div>
+<div style="font-size:12px;color:{{ m.progColor }}">{{ m.progress }}</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:4px;min-width:0">
+<sc-for list="{{ m.dots }}" as="d" hint-placeholder-count="10"><span title="{{ d.title }}" style="width:14px;height:14px;border-radius:4px;background:{{ d.bg }}"></span></sc-for>
+</div>
+<div style="text-align:right">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">{{ m.score }}</div>
+<div style="font-size:11.5px;color:rgba(242,242,245,.5);white-space:nowrap">{{ m.tally }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+
+<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px 20px">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:12px">Fragenübersicht</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<sc-for list="{{ qStats }}" as="q" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:28px minmax(0,1fr) 150px;gap:12px;align-items:center;font-size:13.5px">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;opacity:.55">{{ q.nr }}</span>
+<span style="min-width:0;line-height:1.35;color:rgba(242,242,245,.85)">{{ q.text }}</span>
+<div>
+<div style="height:6px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden"><div style="height:100%;width:{{ q.pct }}%;background:{{ q.barColor }}"></div></div>
+<div style="margin-top:3px;font-size:11.5px;color:rgba(242,242,245,.55)">{{ q.label }}</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
 <sc-if value="{{ isPlay }}" hint-placeholder-val="{{ false }}">
 <div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out">
 <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
@@ -410,6 +478,7 @@ class Component extends DCLogic {
         Object.keys(v.players||{}).forEach(id=>{ this.netPlayers[id] = Object.assign({id}, v.players[id]); });
         const rst = v.reset && v.reset.at;
         if(rst && rst > (this._resetAt||0)){ this.applyReset(rst); return; }
+        if(v.end && v.end.at > (this._gameStartAt||0) && this.state.screen==='play') this.forceEnd();
         this.netGame = (v.game && (v.game.at||0) >= (this._resetAt||0)) ? v.game : null;
         this.syncLobby();
       }, ()=>{ this.setState({conn:'local'}); });
@@ -458,6 +527,7 @@ class Component extends DCLogic {
         if(!raw){ if(/\/game$/.test(t)){ this.netGame = null; this._anyGame = null; this.syncLobby(); } return; }
         let d = null; try { d = JSON.parse(raw); } catch(e){ return; }
         if(/\/reset$/.test(t)){ if(d && d.at > (this._resetAt||0)) this.applyReset(d.at); return; }
+        if(/\/end$/.test(t)){ if(d && d.at > (this._gameStartAt||0) && this.state.screen==='play') this.forceEnd(); return; }
         if(/\/game$/.test(t)){ if(d && (d.at||0) >= (this._resetAt||0)){ this.netGame = d; this._anyGame = d; } }
         else if(d && d.id){ if((d.ts||0) < (this._resetAt||0)) return; this.netPlayers[d.id] = d; }
         this.syncLobby();
@@ -492,10 +562,17 @@ class Component extends DCLogic {
   clearRetained(sub){
     try { if(this._net) this._net.publish(this.topic(sub), '', {qos:0, retain:true}); } catch(e){}
   }
+  forceEnd(){
+    clearInterval(this._iv);
+    this.setState({screen:'done'}, ()=>this.publishMe());
+  }
   publishMe(){
     const me = (lread(this.lk()).players||{})[this.state.myId];
     if(!me) return;
-    const rec = Object.assign({id:this.state.myId}, me, {score:this.state.score||0, ts:Date.now()});
+    const s = this.state;
+    const inGame = s.screen==='play' || s.screen==='done';
+    const rec = Object.assign({id:s.myId}, me, {score:s.score||0, ts:Date.now(),
+      idx: inGame ? s.idx : 0, hist: inGame ? (s.hist||[]) : [], done: s.screen==='done', seed: s.seed||0});
     this.netPlayers[this.state.myId] = rec;
     this.pub('p/'+this.state.myId, rec);
   }
@@ -550,6 +627,7 @@ class Component extends DCLogic {
     this.setState({screen:'lobby', seed:0, score:0, correct:0, picked:null, gameRunning:false});
   };
   joinTeam = t => ()=>{
+    if(this.state.isHost) return;
     const name = (this.state.name||'').trim();
     if(!name) return;
     const p = this.state.players || {};
@@ -577,13 +655,22 @@ class Component extends DCLogic {
   };
   startTeamGame = ()=>{
     if(this.state.mode==='team' && !this.state.isHost) return;
-    if(!this.pool.length) return;
+    if(!this.pool.length || !Object.keys(this.state.players||{}).length) return;
     const seed = Date.now() % 2147483647;
     const game = {seed, at:Date.now(), lf:this.state.lf};
     this.netGame = game;
-    this.mutate(s=>{ s.game = game; return s; });
+    this.clearRetained('end');
+    try { if(this._fb) this._fb.ref.child('end').remove(); } catch(e){}
+    this.mutate(s=>{ s.game = game; if(s.players) delete s.players[this.state.myId]; return s; });
     this.pub('game', game);
-    this.beginGame(seed);
+    this._gameStartAt = game.at;
+    this.setState({screen:'monitor', seed, deck:this.buildDeck(seed), idx:0, score:0, correct:0, picked:null});
+  };
+  endRound = ()=>{
+    if(!this.state.isHost) return;
+    const at = Date.now();
+    this.pub('end', {at});
+    this.backToLobby();
   };
   beginGame(seed){
     if(!this.pool.length){
@@ -592,7 +679,8 @@ class Component extends DCLogic {
       return;
     }
     clearTimeout(this._retry); this._retry = null;
-    this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null}, ()=>{ this.tick(); this.publishMe(); });
+    this._gameStartAt = Date.now();
+    this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null, hist:[]}, ()=>{ this.tick(); this.publishMe(); });
     this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
   }
   drawQr(){
@@ -639,7 +727,7 @@ class Component extends DCLogic {
     this._iv = setInterval(()=>{
       if(this.state.picked !== null){ clearInterval(this._iv); return; }
       const left = Math.max(0, this._deadline - Date.now());
-      if(left <= 0){ clearInterval(this._iv); this.setState({t:0, picked:-1, streak:0}); }
+      if(left <= 0){ clearInterval(this._iv); this.setState(s=>({t:0, picked:-1, streak:0, hist:(s.hist||[]).concat(-1)}), ()=>{ if(this.state.mode==='team') this.heartbeat(); }); }
       else this.setState({t: Math.ceil(left/100)});
     },100);
   };
@@ -651,7 +739,7 @@ class Component extends DCLogic {
     this.setState(s=>{
       const streak = ok ? s.streak+1 : 0;
       const pts = ok ? Math.round(600 + 400*(s.t/(this.secs*10))) + Math.min(streak-1,5)*50 : 0;
-      return {picked:i, streak, score:s.score+pts, correct:s.correct+(ok?1:0), gain:pts};
+      return {picked:i, streak, score:s.score+pts, correct:s.correct+(ok?1:0), gain:pts, hist:(s.hist||[]).concat(ok?1:0)};
     });
     if(this.state.mode==='team') setTimeout(()=>this.heartbeat(), 30);
   };
@@ -659,13 +747,49 @@ class Component extends DCLogic {
     if(this.state.idx+1 >= this.state.deck.length){
       const best = Math.max(this.state.best, this.state.score);
       try { localStorage.setItem('amq-best', String(best)); } catch(e){}
-      if(this.state.mode==='team') this.heartbeat();
-      this.setState({screen:'done', best});
+      this.setState({screen:'done', best}, ()=>{ if(this.state.mode==='team') this.heartbeat(); });
     } else {
       this.setState(s=>({idx:s.idx+1}), this.tick);
     }
   };
 
+  monitorVals(T){
+    const s = this.state, deck = s.deck||[], n = deck.length;
+    const colors = ['oklch(0.55 0.18 25)','oklch(0.52 0.15 250)','oklch(0.58 0.13 165)','oklch(0.74 0.15 75)'];
+    const dotBg = v => v===1 ? 'oklch(0.72 0.16 155)' : v===0 ? 'oklch(0.62 0.20 25)' : v===-1 ? 'oklch(0.78 0.14 75)' : 'rgba(255,255,255,.12)';
+    const all = [];
+    const teams = [0,1,2,3].map(t=>{
+      const ids = Object.keys(s.players||{}).filter(id=>s.players[id].team===t);
+      const members = ids.map(id=>{
+        const p = s.players[id];
+        const cur = p.seed===s.seed;
+        const hist = cur ? (p.hist||[]) : [];
+        all.push({hist, done: cur && !!p.done});
+        const right = hist.filter(v=>v===1).length;
+        return {
+          name: p.name, score: cur ? (p.score||0) : 0,
+          progress: (cur && p.done) ? 'Fertig' : ('Frage ' + Math.min(hist.length+1, n) + ' / ' + n),
+          tally: right + ' richtig · ' + (hist.length-right) + ' falsch',
+          progColor: (cur && p.done) ? 'oklch(0.80 0.15 160)' : 'rgba(242,242,245,.6)',
+          dots: Array.from({length:n}, (_,i)=>({bg: dotBg(hist[i]), title: 'Frage '+(i+1)+': '+(hist[i]===1?'richtig':hist[i]===0?'falsch':hist[i]===-1?'Zeit abgelaufen':'offen')}))
+        };
+      });
+      return {name:TEAM_NAMES[t], color:colors[t], members, score:members.reduce((a,m)=>a+m.score,0), count:members.length};
+    }).filter(t=>t.count).sort((a,b)=>b.score-a.score).map((t,i)=>Object.assign(t,{rank:(i+1)+'.', scoreLabel:t.score+' Pkt.'}));
+    const qStats = deck.map((q,i)=>{
+      const answered = all.filter(a=>a.hist.length>i);
+      const ok = answered.filter(a=>a.hist[i]===1).length;
+      const pct = answered.length ? Math.round(ok/answered.length*100) : 0;
+      return {nr:String(i+1), text:q.q, label: answered.length ? (ok+' / '+answered.length+' richtig') : 'noch offen', pct, barColor: pct>=70 ? 'oklch(0.72 0.16 155)' : pct>=40 ? 'oklch(0.78 0.14 75)' : 'oklch(0.62 0.20 25)'};
+    });
+    const doneCount = all.filter(a=>a.done).length;
+    return {
+      monitorTeams: teams, qStats,
+      doneLabel: doneCount + ' von ' + all.length + ' Spielern fertig',
+      allDone: all.length>0 && doneCount===all.length,
+      noPlayers: all.length===0
+    };
+  }
   renderVals(){
     const s = this.state, q = s.deck[s.idx];
     const revealed = s.picked !== null;
@@ -708,6 +832,8 @@ class Component extends DCLogic {
       connColor: s.conn==='online' ? 'oklch(0.80 0.15 160)' : s.conn==='connecting' ? 'oklch(0.80 0.15 75)' : 'oklch(0.72 0.17 30)',
       myTeamName: mine && mine.team!=null ? TEAM_NAMES[mine.team] : '—',
       canStart: ids.length>0 && !!mine && mine.team!=null,
+      isMonitor: s.screen==='monitor', endRound: this.endRound,
+      ...this.monitorVals(T),
       isHost: !!s.isHost, isGuest: !s.isHost && !s.gameRunning,
       gameRunning: !s.isHost && !!s.gameRunning,
       dataLoading: !s.isHost && !lfList().length,
@@ -715,7 +841,7 @@ class Component extends DCLogic {
       impressumOpen: !!s.impressum,
       openImpressum: ()=>this.setState({impressum:true}),
       closeImpressum: ()=>this.setState({impressum:false}),
-      lobbyHint: !nameOk ? 'Zuerst nur den Vornamen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
+      lobbyHint: s.isHost ? 'Du leitest den Raum und spielst nicht mit. Nach dem Start siehst du live, bei welcher Frage die Spieler sind und was richtig oder falsch beantwortet wurde.' : !nameOk ? 'Zuerst nur den Vornamen eingeben, dann ein Team wählen.' : (mine && mine.team!=null ? (s.isHost ? 'Du bist in '+TEAM_NAMES[mine.team]+' und leitest den Raum. Starte das Quiz, wenn alle bereit sind.' : 'Du bist in '+TEAM_NAMES[mine.team]+'. Das Quiz wird von der Spielleitung gestartet.') : 'Wähle ein Team – maximal 4 Spieler pro Team.'),
       t0: T[0].members, t1: T[1].members, t2: T[2].members, t3: T[3].members,
       c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
       join0: this.joinTeam(0), join1: this.joinTeam(1), join2: this.joinTeam(2), join3: this.joinTeam(3),
