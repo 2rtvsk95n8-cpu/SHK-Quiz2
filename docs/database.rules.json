@@ -12,6 +12,13 @@
           }
         }
       }
+    },
+    "werkstatt": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null",
+        ".validate": "!newData.exists() || (newData.hasChildren(['lf', 'frage', 'antworten', 'korrekt']) && newData.child('lf').isNumber() && newData.child('frage').isString() && newData.child('frage').val().length <= 300 && newData.child('korrekt').isNumber() && newData.child('korrekt').val() >= 0 && newData.child('korrekt').val() <= 3)"
+      }
     }
   }
 }

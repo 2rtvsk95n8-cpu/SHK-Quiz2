@@ -10,7 +10,10 @@ sie die Firebase Realtime Database, sobald `docs/firebase-config.js` ausgefüllt
 ist – andernfalls automatisch einen öffentlichen MQTT-Broker (ohne Konfiguration).
 
 ## Funktionen
-- Auswahl des Lernfelds (LF 1–15 oder alle gemischt) vor dem Start
+- Auswahl des Lernfelds (LF 1–15, alle gemischt oder nur Fragenwerkstatt) vor dem Start
+- **Fragenwerkstatt**: Schüler erstellen eigene Fragen (4 Antworten, eine richtig),
+  sortiert nach Lernfeld; sie werden gespeichert und sind sofort für alle spielbar.
+  Lehrer-Login (Benutzer `Lehrer`, Passwort `Lehrer`) zum Bearbeiten, Löschen und Exportieren.
 - Einzelmodus und Teammodus (vier Teams, max. 4 Spieler pro Team)
 - Ein fester Raum `TW54` – kein Code nötig, Beitritt per QR-Code
 - Live-Anzeige von Teambesetzung und Punktestand auf allen Geräten
@@ -37,7 +40,7 @@ docs/.nojekyll
 ## Firebase einrichten (optional, empfohlen im Schulnetz)
 1. Realtime Database im Firebase-Projekt anlegen (Standort Europa).
 2. Reiter **Regeln**: Inhalt von `docs/database.rules.json` einfügen und veröffentlichen.
-   Die App speichert alles unter `rooms/TW54`.
+   Die App speichert das Spiel unter `rooms/TW54` und die Fragenwerkstatt unter `werkstatt`.
 3. **Authentication → Anmeldemethode → Anonym** aktivieren.
 4. **Authentication → Einstellungen → Autorisierte Domains**: die Pages-Domain
    (z. B. `<user>.github.io`) hinzufügen.
@@ -63,3 +66,10 @@ Geräts.
 `frage`, `antworten` (4 Stück), `korrekt` (Index 0–3), `erklaerung`, `thema`.
 Neue Fragen einfach dort ergänzen – die App liest sie beim Laden ein.
 Formulierungen können vom Fachbuch abweichen.
+
+## Speicherung der Fragenwerkstatt
+- Mit Firebase: dauerhaft in der Realtime Database (`werkstatt/`).
+- Ohne Firebase: beim öffentlichen MQTT-Broker (retained) plus lokale Kopie auf jedem Gerät.
+  Öffentliche Broker garantieren keine dauerhafte Speicherung – für den Dauerbetrieb Firebase
+  nutzen oder regelmäßig über „Exportieren“ (Lehrer-Login) sichern.
+- Der Lehrer-Login ist ein einfacher Schutz in der Oberfläche, keine echte Zugangssicherung.

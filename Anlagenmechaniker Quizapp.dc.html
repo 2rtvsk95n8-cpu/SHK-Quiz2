@@ -20,8 +20,13 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="width:34px;height:34px;border-radius:9px;background:oklch(0.72 0.16 55);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1a1408;font-size:17px">A</div>
 <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px">Anlagenmechaniker Quizapp</div>
 </div>
+<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+<sc-if value="{{ showWerkBtn }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ openWerk }}" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 16px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:rgba(255,255,255,.14)">Fragenwerkstatt</button>
+</sc-if>
 <div style="display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:8px 14px;border-radius:999px">
 <span style="opacity:.55;font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Punkte</span><span>{{ score }}</span>
+</div>
 </div>
 </div>
 
@@ -30,7 +35,7 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:34px 32px">
 <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Anlagenmechaniker SHK</div>
 <h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Wiederholungsfragen Lernfeld 1–15</h1>
-<p style="margin:0 0 22px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">Lernfeld wählen, dann {{ wanted }} Fragen daraus. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
+<p style="margin:0 0 22px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">Lernfeld wählen und Fragen daraus beantworten. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
 
 <div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:10px">Lernfeld wählen</div>
 <sc-if value="{{ dataWaiting }}" hint-placeholder-val="{{ false }}">
@@ -49,6 +54,10 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <button onClick="{{ pickAll }}" style="width:100%;text-align:left;background:{{ allBg }};border:1px solid {{ allBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
 <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Alle Lernfelder gemischt</span>
 <span style="font-size:12px;opacity:.55">{{ allCount }}</span>
+</button>
+<button onClick="{{ pickWerk }}" style="width:100%;text-align:left;background:{{ werkBg }};border:1px solid {{ werkBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:-12px 0 22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Nur Fragen aus der Fragenwerkstatt</span>
+<span style="font-size:12px;opacity:.55">{{ werkCount }}</span>
 </button>
 </sc-if>
 
@@ -162,6 +171,146 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.06);border:1px dashed rgba(255,255,255,.2);border-radius:12px;padding:15px 20px;font-size:14.5px;color:rgba(242,242,245,.7)">Fragen werden geladen …</div>
 </sc-if>
 <button onClick="{{ leaveLobby }}" style="background:transparent;color:rgba(242,242,245,.6);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Lobby verlassen</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWerk }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;max-width:1000px;animation:amqPop .22s ease-out;display:flex;flex-direction:column;gap:18px">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px 28px;display:flex;flex-wrap:wrap;gap:16px 24px;align-items:flex-end;justify-content:space-between">
+<div style="min-width:0;flex:1 1 360px">
+<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:8px">Selbst gestalten</div>
+<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:34px;line-height:1.08;margin:0 0 10px;letter-spacing:-.6px">Fragenwerkstatt</h1>
+<p style="margin:0;font-size:15px;line-height:1.55;color:rgba(242,242,245,.72);max-width:56ch;text-wrap:pretty">Erstelle eigene Fragen mit vier Antworten, von denen eine richtig ist. Gespeicherte Fragen landen im gewählten Lernfeld und können von allen mitgespielt werden.</p>
+<div style="margin-top:12px;display:flex;align-items:center;gap:8px;font-size:12.5px;color:{{ werkSrcColor }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ werkSrcColor }}"></span>{{ werkSrcLabel }}</div>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
+<sc-if value="{{ notAdmin }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ openLogin }}" style="background:transparent;color:rgba(242,242,245,.75);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:11px 16px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Lehrer-Login</button>
+</sc-if>
+<sc-if value="{{ isAdmin }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:8px;font-size:13px;color:oklch(0.80 0.15 160)"><span style="width:8px;height:8px;border-radius:50%;background:oklch(0.80 0.15 160)"></span>Angemeldet als Lehrer</div>
+<button onClick="{{ exportWerk }}" style="background:transparent;color:#f2f2f5;border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:11px 14px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13.5px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Exportieren</button>
+<button onClick="{{ logout }}" style="background:transparent;color:rgba(242,242,245,.65);border:none;padding:11px 6px;font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Abmelden</button>
+</sc-if>
+<button onClick="{{ closeWerk }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:10px;padding:11px 18px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Zurück zum Quiz</button>
+</div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;align-items:start">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px 24px 26px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px">{{ formTitle }}</div>
+<sc-if value="{{ isEditing }}" hint-placeholder-val="{{ false }}"><button onClick="{{ cancelEdit }}" style="background:transparent;border:none;color:rgba(242,242,245,.65);font-family:'IBM Plex Sans',sans-serif;font-size:13px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Abbrechen</button></sc-if>
+</div>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Lernfeld</span>
+<select value="{{ wLf }}" onChange="{{ onWLf }}" style="background:#1b1b26;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<sc-for list="{{ lfSelect }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+</select>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Frage</span>
+<textarea value="{{ wFrage }}" onChange="{{ onWFrage }}" rows="3" maxlength="300" placeholder="z. B. Welcher Mindestabstand gilt beim freien Auslauf AA?" style="resize:vertical;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;line-height:1.45;outline:none" style-focus="border-color:oklch(0.72 0.16 55)"></textarea>
+</label>
+<div style="display:flex;flex-direction:column;gap:9px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Antworten · eine als richtig markieren</span>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="flex:0 0 18px;width:18px;height:18px;background:oklch(0.55 0.18 25);clip-path:polygon(50% 0,100% 100%,0 100%)"></span>
+<input value="{{ wA0 }}" onChange="{{ onA0 }}" maxlength="160" placeholder="Antwort 1" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:11px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ k0 }}" style="flex:0 0 96px;background:{{ kb0 }};color:{{ kc0 }};border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer">{{ kl0 }}</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="flex:0 0 18px;width:14px;height:14px;margin:0 2px;background:oklch(0.52 0.15 250);transform:rotate(45deg)"></span>
+<input value="{{ wA1 }}" onChange="{{ onA1 }}" maxlength="160" placeholder="Antwort 2" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:11px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ k1 }}" style="flex:0 0 96px;background:{{ kb1 }};color:{{ kc1 }};border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer">{{ kl1 }}</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="flex:0 0 18px;width:18px;height:18px;background:oklch(0.58 0.13 165);border-radius:50%"></span>
+<input value="{{ wA2 }}" onChange="{{ onA2 }}" maxlength="160" placeholder="Antwort 3" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:11px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ k2 }}" style="flex:0 0 96px;background:{{ kb2 }};color:{{ kc2 }};border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer">{{ kl2 }}</button>
+</div>
+<div style="display:flex;align-items:center;gap:10px">
+<span style="flex:0 0 18px;width:18px;height:18px;background:oklch(0.74 0.15 75);border-radius:3px"></span>
+<input value="{{ wA3 }}" onChange="{{ onA3 }}" maxlength="160" placeholder="Antwort 4" style="flex:1;min-width:0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:11px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<button onClick="{{ k3 }}" style="flex:0 0 96px;background:{{ kb3 }};color:{{ kc3 }};border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:10px 6px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer">{{ kl3 }}</button>
+</div>
+</div>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Erklärung (optional)</span>
+<textarea value="{{ wE }}" onChange="{{ onWE }}" rows="2" maxlength="400" placeholder="Wird nach dem Beantworten angezeigt" style="resize:vertical;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;line-height:1.45;outline:none" style-focus="border-color:oklch(0.72 0.16 55)"></textarea>
+</label>
+<sc-if value="{{ hasWErr }}" hint-placeholder-val="{{ false }}">
+<div style="background:oklch(0.55 0.18 25 / .18);border:1px solid oklch(0.62 0.20 25 / .5);border-radius:10px;padding:11px 14px;font-size:14px">{{ wErr }}</div>
+</sc-if>
+<sc-if value="{{ hasWOk }}" hint-placeholder-val="{{ false }}">
+<div style="background:oklch(0.72 0.16 155 / .15);border:1px solid oklch(0.72 0.16 155 / .5);border-radius:10px;padding:11px 14px;font-size:14px">{{ wOk }}</div>
+</sc-if>
+<button onClick="{{ saveWerk }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 22px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">{{ saveLabel }}</button>
+</div>
+
+<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px 22px 24px;display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px">
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px">Fragen nach Lernfeld</div>
+<div style="font-size:13px;color:rgba(242,242,245,.55);margin-top:2px">{{ werkTotal }}</div>
+</div>
+<select value="{{ wFilter }}" onChange="{{ onWFilter }}" style="background:#1b1b26;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:9px 10px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:13.5px;outline:none">
+<sc-for list="{{ filterSelect }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+</select>
+</div>
+<sc-if value="{{ werkEmpty }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:22px;font-size:14px;line-height:1.5;color:rgba(242,242,245,.6);text-wrap:pretty">Noch keine eigenen Fragen in diesem Bereich. Die erste Frage erstellst du links.</div>
+</sc-if>
+<sc-for list="{{ werkGroups }}" as="g" hint-placeholder-count="0">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:6px">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:oklch(0.82 0.13 75)">{{ g.title }}</span>
+<span style="font-size:12px;opacity:.55;white-space:nowrap">{{ g.countLabel }}</span>
+</div>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
+<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+<div style="font-weight:600;font-size:15px;line-height:1.4;text-wrap:pretty">{{ it.frage }}</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px">
+<sc-for list="{{ it.answers }}" as="a" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:8px;background:{{ a.bg }};border:1px solid {{ a.bc }};border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.35">
+<span style="flex:0 0 8px;width:8px;height:8px;border-radius:2px;background:{{ a.dot }}"></span>
+<span style="flex:1;min-width:0">{{ a.text }}</span>
+<span style="font-size:11px;font-weight:600;color:oklch(0.80 0.15 160)">{{ a.mark }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ it.hasErkl }}" hint-placeholder-val="{{ false }}"><div style="font-size:12.5px;line-height:1.45;color:rgba(242,242,245,.6);text-wrap:pretty">{{ it.erkl }}</div></sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px">
+<span style="font-size:11.5px;color:rgba(242,242,245,.45)">{{ it.meta }}</span>
+<sc-if value="{{ it.admin }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px">
+<button onClick="{{ it.onEdit }}" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);border-radius:8px;padding:7px 12px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer" style-hover="background:rgba(255,255,255,.16)">Bearbeiten</button>
+<button onClick="{{ it.onDelete }}" style="background:{{ it.delBg }};border:1px solid oklch(0.62 0.20 25 / .6);border-radius:8px;padding:7px 12px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer">{{ it.delLabel }}</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ loginOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:fixed;inset:0;background:rgba(10,10,16,.72);display:flex;align-items:center;justify-content:center;padding:20px;z-index:70">
+<div style="width:100%;max-width:380px;background:#16161f;border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.5);display:flex;flex-direction:column;gap:14px">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:21px">Lehrer-Login</div>
+<div style="font-size:13.5px;line-height:1.5;color:rgba(242,242,245,.65)">Nach der Anmeldung können Fragen der Fragenwerkstatt bearbeitet und gelöscht werden.</div>
+<input value="{{ lUser }}" onChange="{{ onLUser }}" onKeyDown="{{ loginKey }}" placeholder="Benutzername" autocomplete="username" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<input type="password" value="{{ lPass }}" onChange="{{ onLPass }}" onKeyDown="{{ loginKey }}" placeholder="Passwort" autocomplete="current-password" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<sc-if value="{{ hasLErr }}" hint-placeholder-val="{{ false }}"><div style="font-size:13.5px;color:oklch(0.75 0.16 30)">{{ lErr }}</div></sc-if>
+<div style="display:flex;gap:10px;justify-content:flex-end">
+<button onClick="{{ closeLogin }}" style="background:transparent;color:rgba(242,242,245,.7);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:11px 16px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:rgba(255,255,255,.08)">Abbrechen</button>
+<button onClick="{{ doLogin }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:10px;padding:11px 20px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">Anmelden</button>
+</div>
 </div>
 </div>
 </sc-if>
@@ -346,6 +495,10 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <p style="margin:0">Die Spieldaten werden nach Ende der Unterrichtsstunde von der Lehrkraft gelöscht (Funktion „Lobby leeren“). Es findet keine dauerhafte Speicherung statt.</p>
 </div>
 <div>
+<div style="font-weight:600;color:rgba(242,242,245,.92)">Fragenwerkstatt</div>
+<p style="margin:0">In der Fragenwerkstatt erstellte Fragen werden dauerhaft gespeichert, damit alle damit spielen können. Gespeichert werden ausschließlich Lernfeld, Frage, Antworten, die richtige Antwort, eine optionale Erklärung und das Erstellungsdatum. Es werden keine personenbezogenen Daten gespeichert – weder Name noch Kennung der Person, die die Frage erstellt hat. Bitte keine persönlichen Angaben in Fragen oder Antworten eintragen. Die Lehrkraft kann Fragen jederzeit bearbeiten oder löschen.</p>
+</div>
+<div>
 <div style="font-weight:600;color:rgba(242,242,245,.92)">Rechtsgrundlage:</div>
 <p style="margin:0">Art. 6 Abs. 1 lit. e DSGVO in Verbindung mit § 31 Niedersächsisches Schulgesetz (Verarbeitung im Rahmen des Bildungsauftrags der Schule).</p>
 </div>
@@ -374,18 +527,30 @@ const MAX_PER_TEAM = 4;
 function lread(key){ try { return JSON.parse(localStorage.getItem(key || LKEY) || '{}') || {}; } catch(e){ return {}; } }
 function lwrite(next, key){ try { localStorage.setItem(key || LKEY, JSON.stringify(next)); } catch(e){} }
 function lfList(){ const d = (typeof window!=='undefined') ? window.FRAGEN : null; return (d && d.lernfelder) ? d.lernfelder : []; }
-function poolFor(nr){
-  const sel = nr==='all' ? lfList() : lfList().filter(x=>x.nr===nr);
+function poolFor(nr, werk){
   const out = [];
-  sel.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
-    out.push({c:'LF '+lf.nr+' · '+(f.thema||lf.titel), q:f.frage, o:f.antworten, a:f.korrekt, e:f.erklaerung});
-  }); });
+  if(nr !== 'werk'){
+    const sel = nr==='all' ? lfList() : lfList().filter(x=>x.nr===nr);
+    sel.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
+      out.push({c:'LF '+lf.nr+' · '+(f.thema||lf.titel), q:f.frage, o:f.antworten, a:f.korrekt, e:f.erklaerung||''});
+    }); });
+  }
+  (werk||[]).forEach(w=>{
+    if(nr==='all' || nr==='werk' || w.lf===nr) out.push({c:'LF '+w.lf+' · Fragenwerkstatt', q:w.frage, o:w.antworten, a:w.korrekt, e:w.erklaerung||'Frage aus der Fragenwerkstatt.'});
+  });
   return out;
 }
+const WKEY = 'amq-werkstatt-v1';
+const WTOPIC = 'amq_tw54_quiz/werkstatt/q';
+const ANS_COLORS = ['oklch(0.55 0.18 25)','oklch(0.52 0.15 250)','oklch(0.58 0.13 165)','oklch(0.74 0.15 75)'];
 function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a); t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
 
 class Component extends DCLogic {
-  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off', lf:null};
+  state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off', lf:null,
+    wLf:'', wFrage:'', wA:['','','',''], wK:null, wE:'', editId:null, wErr:'', wOk:'', wFilter:'all', confirmDel:null,
+    werkRev:0, werkSrc:'connecting', isAdmin:false, loginOpen:false, lUser:'', lPass:'', lErr:''};
+  werk = {};
+  _wseen = {};
   qrRef = React.createRef();
   lobbyQrRef = React.createRef();
   netPlayers = {};
@@ -407,6 +572,8 @@ class Component extends DCLogic {
     window.addEventListener('storage', this._onStorage);
     this._poll = setInterval(()=>{ this.heartbeat(); this.syncLobby(); }, 1800);
     this.awaitQuestions();
+    try { if(sessionStorage.getItem('amq-admin')==='1') this.setState({isAdmin:true}); } catch(e){}
+    this.initWerkstatt();
   }
   awaitQuestions(){
     if(lfList().length){ this.setState({dataReady:true}); return; }
@@ -449,24 +616,34 @@ class Component extends DCLogic {
       document.head.appendChild(s);
     });
   }
+  fbInit(){
+    if(this._fbInitP) return this._fbInitP;
+    this._fbInitP = (async ()=>{
+      try {
+        const cfg = await this.fbConfig();
+        if(!cfg) return null;
+        if(!window.firebase || !window.firebase.database){
+          const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+          const ok = await Promise.all([
+            this.loadScript(base + 'firebase-app-compat.js'),
+            this.loadScript(base + 'firebase-auth-compat.js'),
+            this.loadScript(base + 'firebase-database-compat.js')
+          ]);
+          if(ok.some(x=>!x) || !window.firebase) return null;
+        }
+        if(!window.firebase.apps.length) window.firebase.initializeApp(cfg);
+        if(!window.firebase.auth().currentUser) await window.firebase.auth().signInAnonymously();
+        return window.firebase.database();
+      } catch(e){ return null; }
+    })();
+    return this._fbInitP;
+  }
   async connectFirebase(room){
     try {
-      const cfg = await this.fbConfig();
-      if(!cfg) return false;
-      if(!window.firebase || !window.firebase.database){
-        const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
-        const ok = await Promise.all([
-          this.loadScript(base + 'firebase-app-compat.js'),
-          this.loadScript(base + 'firebase-auth-compat.js'),
-          this.loadScript(base + 'firebase-database-compat.js')
-        ]);
-        if(ok.some(x=>!x) || !window.firebase) return false;
-      }
-      if(!window.firebase.apps.length) window.firebase.initializeApp(cfg);
-      try { await window.firebase.auth().signInAnonymously(); } catch(e){ return false; }
+      const db = await this.fbInit();
+      if(!db) return false;
       const uid = (window.firebase.auth().currentUser||{}).uid;
       if(uid) this.setState({myId: uid});
-      const db = window.firebase.database();
       const ref = db.ref('rooms/' + room);
       const meId = uid || this.state.myId;
       this._fb = {ref, me: ref.child('players/' + meId)};
@@ -600,8 +777,8 @@ class Component extends DCLogic {
     const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
     const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
     if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
-      const lf = (game.lf === 'all' || typeof game.lf === 'number') ? game.lf : this.state.lf;
-      this.setState({lf}, ()=>this.beginGame(game.seed));
+      const lf = (game.lf === 'all' || game.lf === 'werk' || typeof game.lf === 'number') ? game.lf : this.state.lf;
+      this.setState({lf}, ()=>this.beginGame(game.seed, game.deck));
     }
   }
 
@@ -657,14 +834,15 @@ class Component extends DCLogic {
     if(this.state.mode==='team' && !this.state.isHost) return;
     if(!this.pool.length || !Object.keys(this.state.players||{}).length) return;
     const seed = Date.now() % 2147483647;
-    const game = {seed, at:Date.now(), lf:this.state.lf};
+    const deck = this.buildDeck(seed);
+    const game = {seed, at:Date.now(), lf:this.state.lf, deck};
     this.netGame = game;
     this.clearRetained('end');
     try { if(this._fb) this._fb.ref.child('end').remove(); } catch(e){}
     this.mutate(s=>{ s.game = game; if(s.players) delete s.players[this.state.myId]; return s; });
     this.pub('game', game);
     this._gameStartAt = game.at;
-    this.setState({screen:'monitor', seed, deck:this.buildDeck(seed), idx:0, score:0, correct:0, picked:null});
+    this.setState({screen:'monitor', seed, deck, idx:0, score:0, correct:0, picked:null});
   };
   endRound = ()=>{
     if(!this.state.isHost) return;
@@ -672,15 +850,16 @@ class Component extends DCLogic {
     this.pub('end', {at});
     this.backToLobby();
   };
-  beginGame(seed){
-    if(!this.pool.length){
+  beginGame(seed, sharedDeck){
+    const given = (Array.isArray(sharedDeck) && sharedDeck.length) ? sharedDeck.filter(d=>d && d.q && Array.isArray(d.o)) : null;
+    if(!given && !this.pool.length){
       this.setState({screen:'lobby'});
-      if(!this._retry){ this._retry = setTimeout(()=>{ this._retry = null; if(this.state.screen==='lobby') this.beginGame(seed); }, 500); }
+      if(!this._retry){ this._retry = setTimeout(()=>{ this._retry = null; if(this.state.screen==='lobby') this.beginGame(seed, sharedDeck); }, 500); }
       return;
     }
     clearTimeout(this._retry); this._retry = null;
     this._gameStartAt = Date.now();
-    this.setState({screen:'play', seed, deck:this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null, hist:[]}, ()=>{ this.tick(); this.publishMe(); });
+    this.setState({screen:'play', seed, deck: given || this.buildDeck(seed), idx:0, score:0, streak:0, correct:0, picked:null, hist:[]}, ()=>{ this.tick(); this.publishMe(); });
     this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
   }
   drawQr(){
@@ -692,15 +871,201 @@ class Component extends DCLogic {
     });
   }
   roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
+
+  /* ---- Fragenwerkstatt: Firebase (dauerhaft) → MQTT retained → lokaler Speicher ---- */
+  async initWerkstatt(){
+    this.werk = lread(WKEY).items || {};
+    this.setState({werkRev: Date.now()});
+    const db = await this.fbInit();
+    if(db){
+      this._wfb = db.ref('werkstatt');
+      this._wfb.on('value', snap=>{
+        const v = snap.val() || {};
+        this.werk = {};
+        Object.keys(v).forEach(id=>{ this.werk[id] = Object.assign({}, v[id], {id}); });
+        this.saveWerkCache();
+        this.setState({werkSrc:'firebase', werkRev:Date.now()});
+      }, ()=>{ this._wfb = null; this.werkMqtt(); });
+      return;
+    }
+    this.werkMqtt();
+  }
+  werkMqtt(){
+    if(!window.mqtt){ this.setState({werkSrc:'local'}); return; }
+    const attempt = i => {
+      if(i >= BROKERS.length){ this.setState({werkSrc:'local'}); setTimeout(()=>this.werkMqtt(), 15000); return; }
+      let live = false, c;
+      try { c = window.mqtt.connect(BROKERS[i], {clientId:'amqw_'+Math.random().toString(36).slice(2,10), clean:true, keepalive:30, connectTimeout:6000, reconnectPeriod:0}); }
+      catch(e){ attempt(i+1); return; }
+      c.on('connect', ()=>{
+        live = true; this._wnet = c;
+        this.setState({werkSrc:'mqtt'});
+        c.subscribe(WTOPIC + '/#', {qos:1});
+        setTimeout(()=>{
+          Object.values(this.werk).forEach(q=>{
+            if(q && q.id && !this._wseen[q.id]) c.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true});
+          });
+        }, 3000);
+      });
+      c.on('message', (t, p)=>{
+        const id = t.split('/').pop(); const raw = p.toString();
+        this._wseen[id] = 1;
+        if(!raw){ delete this.werk[id]; }
+        else { try { const d = JSON.parse(raw); const cur = this.werk[id]; if(d && (!cur || (d.ts||0) >= (cur.ts||0))) this.werk[id] = Object.assign(d, {id}); } catch(e){} }
+        this.saveWerkCache();
+        this.setState({werkRev:Date.now()});
+      });
+      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); });
+      c.on('close', ()=>{ if(!live) attempt(i+1); else if(this._wnet===c){ this._wnet = null; this.setState({werkSrc:'connecting'}); setTimeout(()=>this.werkMqtt(), 8000); } });
+    };
+    attempt(0);
+  }
+  saveWerkCache(){ lwrite({items:this.werk}, WKEY); }
+  werkList(){ return Object.values(this.werk||{}).filter(q=>q && !q.deleted && q.frage && Array.isArray(q.antworten) && q.antworten.length===4); }
+  saveWerkItem(q){
+    this.werk[q.id] = q;
+    this.saveWerkCache();
+    try { if(this._wfb){ const c = Object.assign({}, q); delete c.id; this._wfb.child(q.id).set(c).catch(()=>{}); } } catch(e){}
+    try { if(this._wnet) this._wnet.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true}); } catch(e){}
+    this.setState({werkRev:Date.now()});
+  }
+  openWerk = ()=> this.setState({screen:'werkstatt', wErr:'', wOk:''});
+  closeWerk = ()=> this.setState({screen:'join', editId:null, confirmDel:null});
+  setAns = i => e => { const a = this.state.wA.slice(); a[i] = e.target.value; this.setState({wA:a, wErr:'', wOk:''}); };
+  setKorrekt = i => ()=> this.setState({wK:i, wErr:''});
+  saveWerk = ()=>{
+    const s = this.state;
+    const lf = Number(s.wLf);
+    const frage = (s.wFrage||'').trim();
+    const ans = s.wA.map(a=>(a||'').trim());
+    let err = '';
+    if(!lf) err = 'Bitte ein Lernfeld wählen.';
+    else if(frage.length < 8) err = 'Bitte eine vollständige Frage eingeben.';
+    else if(ans.some(a=>!a)) err = 'Bitte alle vier Antworten ausfüllen.';
+    else if(new Set(ans.map(a=>a.toLowerCase())).size < 4) err = 'Die vier Antworten müssen sich unterscheiden.';
+    else if(s.wK == null) err = 'Bitte die richtige Antwort markieren.';
+    if(err){ this.setState({wErr:err, wOk:''}); return; }
+    const editing = s.editId ? this.werk[s.editId] : null;
+    if(editing && !s.isAdmin) return;
+    const id = editing ? s.editId : ('w' + Date.now().toString(36) + Math.random().toString(36).slice(2,6));
+    const now = Date.now();
+    this.saveWerkItem({
+      id, lf, frage: frage.slice(0,300), antworten: ans.map(a=>a.slice(0,160)), korrekt: s.wK,
+      erklaerung: (s.wE||'').trim().slice(0,400), ts: now,
+      created: editing ? (editing.created || editing.ts || now) : now,
+      editedBy: editing ? 'Lehrkraft' : ''
+    });
+    this.setState({wFrage:'', wA:['','','',''], wK:null, wE:'', editId:null, wErr:'',
+      wOk: editing ? 'Änderungen gespeichert.' : ('Frage gespeichert – sie ist jetzt in LF ' + lf + ' spielbar.')});
+  };
+  editWerk(id){
+    if(!this.state.isAdmin) return;
+    const q = this.werk[id]; if(!q) return;
+    this.setState({editId:id, wLf:String(q.lf), wFrage:q.frage, wA:q.antworten.slice(), wK:q.korrekt, wE:q.erklaerung||'', wErr:'', wOk:'', confirmDel:null});
+    try { window.scrollTo({top:0, behavior:'smooth'}); } catch(e){}
+  }
+  cancelEdit = ()=> this.setState({editId:null, wFrage:'', wA:['','','',''], wK:null, wE:'', wErr:'', wOk:''});
+  deleteWerk(id){
+    if(!this.state.isAdmin) return;
+    if(this.state.confirmDel !== id){ this.setState({confirmDel:id}); return; }
+    const tomb = {id, deleted:true, ts:Date.now()};
+    this.werk[id] = tomb;
+    this.saveWerkCache();
+    try { if(this._wfb) this._wfb.child(id).remove().catch(()=>{}); } catch(e){}
+    try { if(this._wnet) this._wnet.publish(WTOPIC+'/'+id, JSON.stringify(tomb), {qos:1, retain:true}); } catch(e){}
+    this.setState({confirmDel:null, werkRev:Date.now(), editId: this.state.editId===id ? null : this.state.editId});
+  }
+  doLogin = ()=>{
+    if(this.state.lUser.trim()==='Lehrer' && this.state.lPass==='Lehrer'){
+      try { sessionStorage.setItem('amq-admin','1'); } catch(e){}
+      this.setState({isAdmin:true, loginOpen:false, lUser:'', lPass:'', lErr:''});
+    } else this.setState({lErr:'Benutzername oder Passwort falsch.'});
+  };
+  logout = ()=>{ try { sessionStorage.removeItem('amq-admin'); } catch(e){} this.setState({isAdmin:false, editId:null, confirmDel:null}); };
+  exportWerk = ()=>{
+    const list = this.werkList().sort((a,b)=>a.lf-b.lf);
+    const data = {titel:'Fragenwerkstatt', exportiert:new Date().toISOString(), fragen:list.map(q=>({lernfeld:q.lf, frage:q.frage, antworten:q.antworten, korrekt:q.korrekt, erklaerung:q.erklaerung||''}))};
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
+    a.download = 'fragenwerkstatt.json';
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+  werkVals(){
+    const s = this.state, lfs = lfList(), list = this.werkList();
+    const nrs = lfs.length ? lfs.map(l=>l.nr) : Array.from({length:15}, (_,i)=>i+1);
+    const lfTitle = nr => (lfs.find(l=>l.nr===nr)||{}).titel || '';
+    const shown = s.wFilter==='all' ? nrs : nrs.filter(n=>n===Number(s.wFilter));
+    const fmt = ts => { try { return new Date(ts).toLocaleDateString('de-DE'); } catch(e){ return ''; } };
+    const groups = shown.map(nr=>{
+      const items = list.filter(q=>q.lf===nr).sort((a,b)=>(b.created||b.ts||0)-(a.created||a.ts||0));
+      return {
+        title: 'LF ' + nr + (lfTitle(nr) ? ' · ' + lfTitle(nr) : ''),
+        countLabel: items.length + (items.length===1 ? ' Frage' : ' Fragen'),
+        items: items.map(q=>({
+          frage: q.frage, erkl: q.erklaerung || '', hasErkl: !!q.erklaerung,
+          answers: q.antworten.map((a,i)=>({
+            text: a, dot: ANS_COLORS[i], mark: i===q.korrekt ? 'richtig' : '',
+            bg: i===q.korrekt ? 'oklch(0.72 0.16 155 / .16)' : 'rgba(255,255,255,.035)',
+            bc: i===q.korrekt ? 'oklch(0.72 0.16 155 / .6)' : 'rgba(255,255,255,.08)'
+          })),
+          meta: 'Erstellt am ' + fmt(q.created || q.ts) + (q.editedBy ? ' · bearbeitet von der Lehrkraft' : ''),
+          admin: !!s.isAdmin,
+          onEdit: ()=>this.editWerk(q.id), onDelete: ()=>this.deleteWerk(q.id),
+          delLabel: s.confirmDel===q.id ? 'Wirklich löschen?' : 'Löschen',
+          delBg: s.confirmDel===q.id ? 'oklch(0.55 0.18 25)' : 'transparent'
+        }))
+      };
+    }).filter(g=>g.items.length);
+    const src = s.werkSrc;
+    const kb = i => s.wK===i ? 'oklch(0.72 0.16 155)' : 'transparent';
+    const kc = i => s.wK===i ? '#08150f' : 'rgba(242,242,245,.7)';
+    const kl = i => s.wK===i ? '✓ Richtig' : 'Richtig?';
+    return {
+      isWerk: s.screen==='werkstatt', showWerkBtn: s.screen==='join',
+      openWerk: this.openWerk, closeWerk: this.closeWerk,
+      werkGroups: groups, werkEmpty: groups.length===0,
+      werkTotal: list.length + (list.length===1 ? ' eigene Frage' : ' eigene Fragen'),
+      werkSrcLabel: src==='firebase' ? 'Dauerhaft gespeichert – für alle sichtbar' : src==='mqtt' ? 'Online geteilt – für alle sichtbar' : src==='local' ? 'Offline – nur auf diesem Gerät gespeichert' : 'Verbinde…',
+      werkSrcColor: (src==='firebase'||src==='mqtt') ? 'oklch(0.80 0.15 160)' : src==='local' ? 'oklch(0.72 0.17 30)' : 'oklch(0.80 0.15 75)',
+      lfSelect: [{v:'', label:'Lernfeld wählen …'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + (lfTitle(n) ? ' · ' + lfTitle(n) : '')}))),
+      filterSelect: [{v:'all', label:'Alle Lernfelder'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + ' (' + list.filter(q=>q.lf===n).length + ')'}))),
+      wLf: s.wLf, wFrage: s.wFrage, wE: s.wE, wFilter: s.wFilter,
+      wA0: s.wA[0], wA1: s.wA[1], wA2: s.wA[2], wA3: s.wA[3],
+      onWLf: e=>this.setState({wLf:e.target.value, wErr:'', wOk:''}),
+      onWFrage: e=>this.setState({wFrage:e.target.value, wErr:'', wOk:''}),
+      onWE: e=>this.setState({wE:e.target.value}),
+      onWFilter: e=>this.setState({wFilter:e.target.value}),
+      onA0: this.setAns(0), onA1: this.setAns(1), onA2: this.setAns(2), onA3: this.setAns(3),
+      k0: this.setKorrekt(0), k1: this.setKorrekt(1), k2: this.setKorrekt(2), k3: this.setKorrekt(3),
+      kb0: kb(0), kb1: kb(1), kb2: kb(2), kb3: kb(3),
+      kc0: kc(0), kc1: kc(1), kc2: kc(2), kc3: kc(3),
+      kl0: kl(0), kl1: kl(1), kl2: kl(2), kl3: kl(3),
+      saveWerk: this.saveWerk, cancelEdit: this.cancelEdit,
+      isEditing: !!s.editId,
+      formTitle: s.editId ? 'Frage bearbeiten' : 'Neue Frage erstellen',
+      saveLabel: s.editId ? 'Änderungen speichern' : 'Frage speichern',
+      wErr: s.wErr, hasWErr: !!s.wErr, wOk: s.wOk, hasWOk: !!s.wOk,
+      isAdmin: !!s.isAdmin, notAdmin: !s.isAdmin,
+      loginOpen: !!s.loginOpen,
+      openLogin: ()=>this.setState({loginOpen:true, lErr:''}),
+      closeLogin: ()=>this.setState({loginOpen:false, lUser:'', lPass:'', lErr:''}),
+      lUser: s.lUser, lPass: s.lPass, lErr: s.lErr, hasLErr: !!s.lErr,
+      onLUser: e=>this.setState({lUser:e.target.value, lErr:''}),
+      onLPass: e=>this.setState({lPass:e.target.value, lErr:''}),
+      loginKey: e=>{ if(e.key==='Enter') this.doLogin(); },
+      doLogin: this.doLogin, logout: this.logout, exportWerk: this.exportWerk
+    };
+  }
   componentWillUnmount(){
     clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll);
     clearInterval(this._retryNet); clearTimeout(this._retry); this.closeNet();
+    try { if(this._wnet) this._wnet.end(true); if(this._wfb) this._wfb.off(); } catch(e){}
     window.removeEventListener('storage', this._onStorage);
     try { if(this._ch) this._ch.close(); } catch(e){}
   }
 
   get secs(){ return Math.round(this.props.timerSeconds ?? 25); }
-  get pool(){ return poolFor(this.state.lf); }
+  get pool(){ return poolFor(this.state.lf, this.werkList()); }
   get count(){ return Math.max(1, Math.min(Math.round(this.props.questionCount ?? 20), this.pool.length)); }
 
   shuffle(a, rnd){ const r=a.slice(); const f = rnd || Math.random; for(let i=r.length-1;i>0;i--){const j=Math.floor(f()*(i+1));[r[i],r[j]]=[r[j],r[i]];} return r; }
@@ -711,7 +1076,7 @@ class Component extends DCLogic {
     const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(all, rnd) : all.slice();
     return picked.slice(0, this.count).map(item=>{
       const idxs = this.shuffle([0,1,2,3], rnd);
-      return {c:item.c, q:item.q, e:item.e, o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
+      return {c:item.c||'', q:item.q||'', e:item.e||'', o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
     });
   }
 
@@ -794,7 +1159,9 @@ class Component extends DCLogic {
     const s = this.state, q = s.deck[s.idx];
     const revealed = s.picked !== null;
     const ok = revealed && s.picked === (q && q.a);
-    const total = this.count;
+    const inRound = s.screen==='play' || s.screen==='done' || s.screen==='monitor';
+    const total = (inRound && s.deck && s.deck.length) ? s.deck.length : this.count;
+    const werk = this.werkList();
     const ringOf = i => (revealed && q && i===q.a) ? '0 0 0 4px #f2f2f5' : 'none';
     const dimOf = i => (revealed && q && i!==q.a && i!==s.picked) ? 0.55 : 0;
     const grade = s.correct/total >= 0.9 ? 'Sehr gut – prüfungsreif.' : s.correct/total >= 0.7 ? 'Gut. Ein paar Regelwerte noch einmal ansehen.' : s.correct/total >= 0.5 ? 'Solide Basis, Kapitel 5.4 nochmal durcharbeiten.' : 'Noch viel Luft – Musterlösung wiederholen.';
@@ -811,7 +1178,7 @@ class Component extends DCLogic {
       lobbyQrRef: this.lobbyQrRef, nameOk, playerTotal: ids.length,
       room: s.room, roomLink: this.roomLink(), joinAsGuest: this.joinAsGuest,
       lfOptions: lfList().map(l=>({
-        nr:'LF '+l.nr, titel:l.titel, count:(l.fragen||[]).length+' Fragen',
+        nr:'LF '+l.nr, titel:l.titel, count:((l.fragen||[]).length + werk.filter(w=>w.lf===l.nr).length)+' Fragen',
         bg: s.lf===l.nr ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
         bc: s.lf===l.nr ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
         onClick: this.pickLf(l.nr)
@@ -819,13 +1186,18 @@ class Component extends DCLogic {
       allBg: s.lf==='all' ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
       allBc: s.lf==='all' ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
       pickAll: this.pickLf('all'),
-      allCount: poolFor('all').length + ' Fragen',
+      allCount: poolFor('all', werk).length + ' Fragen',
+      werkCount: werk.length + (werk.length===1 ? ' Frage' : ' Fragen'),
+      pickWerk: this.pickLf('werk'),
+      werkBg: s.lf==='werk' ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
+      werkBc: s.lf==='werk' ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.12)',
+      ...this.werkVals(),
       lfChosen: s.lf != null,
       dataReady: !!lfList().length,
       dataWaiting: !lfList().length,
       readyOpacity: (s.lf != null && this.pool.length) ? 1 : 0.42,
       readyCursor: (s.lf != null && this.pool.length) ? 'pointer' : 'not-allowed',
-      lfLabel: s.lf === 'all' ? 'Alle Lernfelder' : (s.lf != null ? ('LF ' + s.lf + ' · ' + ((lfList().find(l=>l.nr===s.lf)||{}).titel||'')) : 'Noch kein Lernfeld gewählt'),
+      lfLabel: s.lf === 'all' ? 'Alle Lernfelder' : s.lf === 'werk' ? 'Fragen aus der Fragenwerkstatt' : (s.lf != null ? ('LF ' + s.lf + ' · ' + ((lfList().find(l=>l.nr===s.lf)||{}).titel||'')) : 'Noch kein Lernfeld gewählt'),
       poolSize: this.pool.length,
       wanted: Math.round(this.props.questionCount ?? 20),
       connLabel: s.conn==='online' ? 'Online verbunden' : s.conn==='connecting' ? 'Verbinde…' : 'Offline – nur dieses Gerät',
