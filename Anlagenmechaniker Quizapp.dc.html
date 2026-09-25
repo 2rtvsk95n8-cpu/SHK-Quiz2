@@ -873,60 +873,106 @@ class Component extends DCLogic {
   roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
 
   /* ---- Fragenwerkstatt: Firebase (dauerhaft) → MQTT retained → lokaler Speicher ---- */
+  /* Alle Kanäle laufen parallel (Firebase + alle MQTT-Broker). Jeder Eintrag trägt ts;
+     der neueste gewinnt. Gelöschte Fragen bleiben als {deleted:true} erhalten, damit sie
+     nicht von Geräten mit alter Kopie zurückgeschrieben werden. */
+  werkMerge(d){
+    if(!d || !d.id) return false;
+    const cur = this.werk[d.id];
+    if(cur && (cur.ts||0) >= (d.ts||0)) return false;
+    this.werk[d.id] = d;
+    return true;
+  }
+  werkStatus(){
+    const mq = (this._wnets||[]).filter(x=>x.live).length;
+    const src = this._fbOk ? 'firebase' : mq ? 'mqtt' : (this._wTried ? 'local' : 'connecting');
+    if(src !== this.state.werkSrc) this.setState({werkSrc:src});
+  }
   async initWerkstatt(){
     this.werk = lread(WKEY).items || {};
     this.setState({werkRev: Date.now()});
+    this._wnets = [];
+    this.werkMqttAll();
+    setTimeout(()=>{ this._wTried = true; this.werkStatus(); }, 9000);
     const db = await this.fbInit();
-    if(db){
-      this._wfb = db.ref('werkstatt');
-      this._wfb.on('value', snap=>{
-        const v = snap.val() || {};
-        this.werk = {};
-        Object.keys(v).forEach(id=>{ this.werk[id] = Object.assign({}, v[id], {id}); });
-        this.saveWerkCache();
-        this.setState({werkSrc:'firebase', werkRev:Date.now()});
-      }, ()=>{ this._wfb = null; this.werkMqtt(); });
-      return;
-    }
-    this.werkMqtt();
+    if(!db) return;
+    this._wfb = db.ref('werkstatt');
+    this._wfb.on('value', snap=>{
+      this._fbOk = true;
+      const v = snap.val() || {};
+      let changed = false;
+      Object.keys(v).forEach(id=>{ if(this.werkMerge(Object.assign({}, v[id], {id}))) changed = true; });
+      Object.values(this.werk).forEach(q=>{
+        if(q && q.id && (!v[q.id] || (v[q.id].ts||0) < (q.ts||0))) this.fbWrite(q);
+      });
+      if(changed){ this.saveWerkCache(); this.setState({werkRev:Date.now()}); }
+      this.werkStatus();
+    }, ()=>{ this._fbOk = false; this._wfb = null; this.werkStatus(); });
   }
-  werkMqtt(){
-    if(!window.mqtt){ this.setState({werkSrc:'local'}); return; }
-    const attempt = i => {
-      if(i >= BROKERS.length){ this.setState({werkSrc:'local'}); setTimeout(()=>this.werkMqtt(), 15000); return; }
-      let live = false, c;
-      try { c = window.mqtt.connect(BROKERS[i], {clientId:'amqw_'+Math.random().toString(36).slice(2,10), clean:true, keepalive:30, connectTimeout:6000, reconnectPeriod:0}); }
-      catch(e){ attempt(i+1); return; }
-      c.on('connect', ()=>{
-        live = true; this._wnet = c;
-        this.setState({werkSrc:'mqtt'});
-        c.subscribe(WTOPIC + '/#', {qos:1});
-        setTimeout(()=>{
-          Object.values(this.werk).forEach(q=>{
-            if(q && q.id && !this._wseen[q.id]) c.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true});
-          });
-        }, 3000);
-      });
-      c.on('message', (t, p)=>{
-        const id = t.split('/').pop(); const raw = p.toString();
-        this._wseen[id] = 1;
-        if(!raw){ delete this.werk[id]; }
-        else { try { const d = JSON.parse(raw); const cur = this.werk[id]; if(d && (!cur || (d.ts||0) >= (cur.ts||0))) this.werk[id] = Object.assign(d, {id}); } catch(e){} }
+  fbWrite(q){
+    try {
+      if(!this._wfb) return;
+      const c = Object.assign({}, q); delete c.id;
+      Object.keys(c).forEach(k=>{ if(c[k] === undefined) delete c[k]; });
+      this._wfb.child(q.id).set(c).catch(()=>{ this._fbOk = false; this.werkStatus(); });
+    } catch(e){}
+  }
+  werkMqttAll(){
+    if(!window.mqtt){ setTimeout(()=>{ if(window.mqtt) this.werkMqttAll(); }, 1500); return; }
+    BROKERS.forEach(url=>this.werkMqttOne(url));
+  }
+  werkMqttOne(url){
+    const entry = {url, live:false, seen:{}, c:null};
+    this._wnets = (this._wnets||[]).filter(x=>x.url!==url).concat(entry);
+    let c;
+    try { c = window.mqtt.connect(url, {clientId:'amqw_'+Math.random().toString(36).slice(2,10), clean:true, keepalive:30, connectTimeout:8000, reconnectPeriod:0}); }
+    catch(e){ setTimeout(()=>this.werkMqttOne(url), 15000); return; }
+    entry.c = c;
+    c.on('connect', ()=>{
+      entry.live = true; this.werkStatus();
+      c.subscribe(WTOPIC + '/#', {qos:1});
+      setTimeout(()=>{
+        if(!entry.live) return;
+        Object.values(this.werk).forEach(q=>{
+          if(q && q.id && !entry.seen[q.id]) c.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true});
+        });
+      }, 4000);
+    });
+    c.on('message', (t, p)=>{
+      const id = t.split('/').pop(); const raw = p.toString();
+      if(!raw) return;
+      let d = null; try { d = JSON.parse(raw); } catch(e){ return; }
+      if(!d) return;
+      d.id = id;
+      const cur = this.werk[id];
+      entry.seen[id] = d.ts || 1;
+      if(cur && (cur.ts||0) > (d.ts||0)){ try { c.publish(WTOPIC+'/'+id, JSON.stringify(cur), {qos:1, retain:true}); } catch(e){} return; }
+      if(this.werkMerge(d)){
         this.saveWerkCache();
+        this.fbWrite(d);
+        (this._wnets||[]).forEach(o=>{ if(o!==entry && o.live && (o.seen[id]||0) < (d.ts||0)){ try { o.c.publish(WTOPIC+'/'+id, JSON.stringify(d), {qos:1, retain:true}); } catch(e){} } });
         this.setState({werkRev:Date.now()});
-      });
-      c.on('error', ()=>{ try{ c.end(true); }catch(e){} if(!live) attempt(i+1); });
-      c.on('close', ()=>{ if(!live) attempt(i+1); else if(this._wnet===c){ this._wnet = null; this.setState({werkSrc:'connecting'}); setTimeout(()=>this.werkMqtt(), 8000); } });
+      }
+    });
+    const down = ()=>{
+      if(entry.dead) return; entry.dead = true;
+      entry.live = false; this.werkStatus();
+      try { c.end(true); } catch(e){}
+      if(!this._unmounted) setTimeout(()=>this.werkMqttOne(url), 10000);
     };
-    attempt(0);
+    c.on('error', down);
+    c.on('close', down);
+  }
+  werkPublish(q){
+    this.fbWrite(q);
+    (this._wnets||[]).forEach(o=>{ if(o.live){ try { o.c.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true}); o.seen[q.id] = q.ts; } catch(e){} } });
   }
   saveWerkCache(){ lwrite({items:this.werk}, WKEY); }
   werkList(){ return Object.values(this.werk||{}).filter(q=>q && !q.deleted && q.frage && Array.isArray(q.antworten) && q.antworten.length===4); }
   saveWerkItem(q){
     this.werk[q.id] = q;
     this.saveWerkCache();
-    try { if(this._wfb){ const c = Object.assign({}, q); delete c.id; this._wfb.child(q.id).set(c).catch(()=>{}); } } catch(e){}
-    try { if(this._wnet) this._wnet.publish(WTOPIC+'/'+q.id, JSON.stringify(q), {qos:1, retain:true}); } catch(e){}
+    this.werkPublish(q);
     this.setState({werkRev:Date.now()});
   }
   openWerk = ()=> this.setState({screen:'werkstatt', wErr:'', wOk:''});
@@ -971,8 +1017,7 @@ class Component extends DCLogic {
     const tomb = {id, deleted:true, ts:Date.now()};
     this.werk[id] = tomb;
     this.saveWerkCache();
-    try { if(this._wfb) this._wfb.child(id).remove().catch(()=>{}); } catch(e){}
-    try { if(this._wnet) this._wnet.publish(WTOPIC+'/'+id, JSON.stringify(tomb), {qos:1, retain:true}); } catch(e){}
+    this.werkPublish(tomb);
     this.setState({confirmDel:null, werkRev:Date.now(), editId: this.state.editId===id ? null : this.state.editId});
   }
   doLogin = ()=>{
@@ -1025,7 +1070,7 @@ class Component extends DCLogic {
       openWerk: this.openWerk, closeWerk: this.closeWerk,
       werkGroups: groups, werkEmpty: groups.length===0,
       werkTotal: list.length + (list.length===1 ? ' eigene Frage' : ' eigene Fragen'),
-      werkSrcLabel: src==='firebase' ? 'Dauerhaft gespeichert – für alle sichtbar' : src==='mqtt' ? 'Online geteilt – für alle sichtbar' : src==='local' ? 'Offline – nur auf diesem Gerät gespeichert' : 'Verbinde…',
+      werkSrcLabel: src==='firebase' ? 'Dauerhaft gespeichert in Firebase – auf allen Geräten sichtbar' : src==='mqtt' ? ('Online geteilt über ' + (this._wnets||[]).filter(x=>x.live).length + ' von 3 Servern – ohne Firebase keine Speichergarantie') : src==='local' ? 'Offline – nur auf diesem Gerät gespeichert' : 'Verbinde…',
       werkSrcColor: (src==='firebase'||src==='mqtt') ? 'oklch(0.80 0.15 160)' : src==='local' ? 'oklch(0.72 0.17 30)' : 'oklch(0.80 0.15 75)',
       lfSelect: [{v:'', label:'Lernfeld wählen …'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + (lfTitle(n) ? ' · ' + lfTitle(n) : '')}))),
       filterSelect: [{v:'all', label:'Alle Lernfelder'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + ' (' + list.filter(q=>q.lf===n).length + ')'}))),
@@ -1059,7 +1104,8 @@ class Component extends DCLogic {
   componentWillUnmount(){
     clearInterval(this._iv); clearInterval(this._poll); clearInterval(this._dataPoll);
     clearInterval(this._retryNet); clearTimeout(this._retry); this.closeNet();
-    try { if(this._wnet) this._wnet.end(true); if(this._wfb) this._wfb.off(); } catch(e){}
+    this._unmounted = true;
+    try { (this._wnets||[]).forEach(o=>{ o.dead = true; try { o.c && o.c.end(true); } catch(e){} }); if(this._wfb) this._wfb.off(); } catch(e){}
     window.removeEventListener('storage', this._onStorage);
     try { if(this._ch) this._ch.close(); } catch(e){}
   }
