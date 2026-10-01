@@ -58,7 +58,7 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <sc-if value="{{ dataReady }}" hint-placeholder-val="{{ true }}">
 <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:22px">
 <div style="display:flex;flex-direction:column;gap:8px">
-<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">Wiederholungsfragen aus dem Fachbuch</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">Wiederholungsfragen Fachbuch</div>
 <select value="{{ bookValue }}" onChange="{{ onPickBook }}" style="width:100%;background:#1b1b26;border:1px solid {{ bookBc }};border-radius:12px;padding:14px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;outline:none;cursor:pointer" style-focus="border-color:oklch(0.72 0.16 55)">
 <option value="">Lernfeld wählen …</option>
 <sc-for list="{{ bookOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
