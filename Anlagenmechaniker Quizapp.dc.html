@@ -13,52 +13,66 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 @keyframes amqPop{from{transform:scale(.94);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes amqBar{from{opacity:.6}to{opacity:1}}
 </style></helmet>
-<div style="min-height:100vh;background:radial-gradient(1200px 700px at 50% -10%,#1d2340 0%,#101018 60%);color:#f2f2f5;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:24px 20px 40px;box-sizing:border-box">
+<div style="min-height:100vh;background:radial-gradient(1200px 700px at 50% -10%,#1d2340 0%,#101018 60%);color:#f2f2f5;font-family:'IBM Plex Sans',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:clamp(14px,4vw,24px) clamp(12px,4vw,20px) 40px;box-sizing:border-box;overflow-x:hidden">
 
-<div style="width:100%;max-width:1000px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px">
-<div style="display:flex;align-items:center;gap:12px">
-<div style="width:34px;height:34px;border-radius:9px;background:oklch(0.72 0.16 55);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1a1408;font-size:17px">A</div>
-<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:17px;letter-spacing:-.2px">Anlagenmechaniker Quizapp</div>
+<div style="width:100%;max-width:{{ footerMax }};display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;column-gap:16px;row-gap:10px;margin-bottom:20px">
+<div style="display:flex;align-items:center;gap:12px;min-width:0">
+<div style="flex:0 0 34px;width:34px;height:34px;border-radius:9px;background:oklch(0.72 0.16 55);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:700;color:#1a1408;font-size:17px">A</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(15px,4.2vw,17px);letter-spacing:-.2px;min-width:0">Anlagenmechaniker Quizapp</div>
 </div>
 <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
-<sc-if value="{{ showWerkBtn }}" hint-placeholder-val="{{ true }}">
-<button onClick="{{ openWerk }}" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:8px 16px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px;cursor:pointer" style-hover="background:rgba(255,255,255,.14)">Fragenwerkstatt</button>
-</sc-if>
+<sc-if value="{{ inGame }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:8px 14px;border-radius:999px">
 <span style="opacity:.55;font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Punkte</span><span>{{ score }}</span>
 </div>
+</sc-if>
 </div>
 </div>
 
+<sc-if value="{{ qrBig }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeQrBig }}" style="position:fixed;inset:0;z-index:1000;background:rgba(8,8,14,.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:20px;box-sizing:border-box;cursor:zoom-out">
+<div style="background:#fff;border-radius:22px;width:min(86vw,72vh,560px);height:min(86vw,72vh,560px);display:flex;align-items:center;justify-content:center">
+<canvas ref="{{ qrBigRef }}" width="600" height="600" style="width:88%;height:88%;display:block"></canvas>
+</div>
+<div style="color:#f2f2f5;font-size:14px;opacity:.75">Tippen zum Schließen</div>
+</div>
+</sc-if>
 <sc-if value="{{ isJoin }}" hint-placeholder-val="{{ true }}">
-<div style="width:100%;max-width:1000px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:28px;align-items:start">
-<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:34px 32px">
+<div style="width:100%;max-width:760px;display:flex;flex-direction:column">
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:clamp(20px,5vw,34px) clamp(16px,5vw,32px);box-sizing:border-box;min-width:0">
+<div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+<button onClick="{{ openQrBig }}" title="QR-Code vergrößern" style="flex:0 0 auto;width:132px;height:132px;background:#fff;border:0;border-radius:14px;padding:0;line-height:0;display:flex;align-items:center;justify-content:center;cursor:zoom-in" style-hover="box-shadow:0 0 0 3px oklch(0.72 0.16 55)">
+<canvas ref="{{ qrRef }}" width="220" height="220" style="width:120px;height:120px;display:block;border-radius:4px"></canvas>
+</button>
+<div style="min-width:0">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;margin-bottom:3px">Mit dem Handy beitreten</div>
+<div style="font-size:12.5px;line-height:1.4;color:rgba(242,242,245,.6)">QR-Code scannen – das Quiz öffnet sich im Browser. Antippen zum Vergrößern.</div>
+</div>
+</div>
 <div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.55;margin-bottom:10px">Anlagenmechaniker SHK</div>
-<h1 style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:38px;line-height:1.08;margin:0 0 14px;letter-spacing:-.8px;text-wrap:pretty">Wiederholungsfragen Lernfeld 1–15</h1>
 <p style="margin:0 0 22px;font-size:16px;line-height:1.55;color:rgba(242,242,245,.72);max-width:52ch;text-wrap:pretty">Lernfeld wählen und Fragen daraus beantworten. Vier Antworten, eine ist richtig. Je schneller du antwortest, desto mehr Punkte — mit Serien-Bonus.</p>
 
-<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;opacity:.5;margin-bottom:10px">Lernfeld wählen</div>
 <sc-if value="{{ dataWaiting }}" hint-placeholder-val="{{ false }}">
 <div style="border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:20px;font-size:14px;color:rgba(242,242,245,.6);margin-bottom:22px">Fragen werden geladen …</div>
 </sc-if>
 <sc-if value="{{ dataReady }}" hint-placeholder-val="{{ true }}">
-<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px;margin-bottom:12px">
-<sc-for list="{{ lfOptions }}" as="l" hint-placeholder-count="15">
-<button onClick="{{ l.onClick }}" style="text-align:left;background:{{ l.bg }};border:1px solid {{ l.bc }};border-radius:11px;padding:11px 13px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;flex-direction:column;gap:3px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
-<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;color:oklch(0.82 0.13 75)">{{ l.nr }}</span>
-<span style="font-size:13px;line-height:1.3">{{ l.titel }}</span>
-<span style="font-size:11.5px;opacity:.5">{{ l.count }}</span>
-</button>
-</sc-for>
+<div style="display:flex;flex-direction:column;gap:18px;margin-bottom:22px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">Wiederholungsfragen aus dem Fachbuch</div>
+<select value="{{ bookValue }}" onChange="{{ onPickBook }}" style="width:100%;background:#1b1b26;border:1px solid {{ bookBc }};border-radius:12px;padding:14px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;outline:none;cursor:pointer" style-focus="border-color:oklch(0.72 0.16 55)">
+<option value="">Lernfeld wählen …</option>
+<sc-for list="{{ bookOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+</select>
 </div>
-<button onClick="{{ pickAll }}" style="width:100%;text-align:left;background:{{ allBg }};border:1px solid {{ allBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
-<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Alle Lernfelder gemischt</span>
-<span style="font-size:12px;opacity:.55">{{ allCount }}</span>
-</button>
-<button onClick="{{ pickWerk }}" style="width:100%;text-align:left;background:{{ werkBg }};border:1px solid {{ werkBc }};border-radius:11px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;cursor:pointer;display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:-12px 0 22px;transition:background .15s,border-color .15s" style-hover="background:rgba(255,255,255,.1)">
-<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14px">Nur Fragen aus der Fragenwerkstatt</span>
-<span style="font-size:12px;opacity:.55">{{ werkCount }}</span>
-</button>
+<div style="display:flex;flex-direction:column;gap:8px">
+<button onClick="{{ openWerk }}" style="align-self:flex-start;margin:22px 0 22px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:7px 14px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer" style-hover="background:rgba(255,255,255,.14)">Fragenwerkstatt öffnen</button>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px">Fragen aus der Fragenwerkstatt</div>
+<select value="{{ werkValue }}" onChange="{{ onPickWerk }}" style="width:100%;background:#1b1b26;border:1px solid {{ werkSelBc }};border-radius:12px;padding:14px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15.5px;outline:none;cursor:pointer" style-focus="border-color:oklch(0.72 0.16 55)">
+<option value="">Lernfeld / Unterkapitel wählen …</option>
+<sc-for list="{{ werkOpts }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}" disabled="{{ o.dis }}">{{ o.label }}</option></sc-for>
+</select>
+</div>
+</div>
 </sc-if>
 
 <div style="font-size:13.5px;color:rgba(242,242,245,.62);margin-bottom:16px">Gewählt: <span style="color:#f2f2f5;font-weight:600">{{ lfLabel }}</span></div>
@@ -69,17 +83,11 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <button onClick="{{ joinAsGuest }}" style="flex:0 0 auto;background:transparent;color:rgba(242,242,245,.7);border:none;padding:15px 8px;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;cursor:pointer;text-decoration:underline" style-hover="color:#f2f2f5">Als Spieler beitreten</button>
 </div>
 <div style="margin-top:22px;display:flex;flex-wrap:wrap;gap:10px 22px;font-size:13px;color:rgba(242,242,245,.5)">
-<span>{{ secs }} Sekunden pro Frage</span><span>Max. 1000 Punkte pro Frage</span><span>Bestleistung: {{ best }}</span>
+<span>Standard: {{ secs }} Sekunden pro Frage</span><span>Max. 1000 Punkte pro Frage</span>
 </div>
 <sc-if value="{{ lfChosen }}" hint-placeholder-val="{{ false }}">
-<div style="margin-top:10px;font-size:13px;color:rgba(242,242,245,.5)">{{ poolSize }} Fragen im gewählten Lernfeld verfügbar</div>
+<div style="margin-top:10px;font-size:13px;color:rgba(242,242,245,.5)">{{ poolSize }} Fragen in der Auswahl verfügbar</div>
 </sc-if>
-</div>
-<div style="background:#fff;color:#101018;border-radius:20px;padding:24px;text-align:center">
-<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;margin-bottom:4px">Mit dem Handy beitreten</div>
-<div style="font-size:12.5px;color:rgba(16,16,24,.6);margin-bottom:16px">QR-Code scannen — Quiz öffnet sich im Browser</div>
-<canvas ref="{{ qrRef }}" width="220" height="220" style="width:220px;height:220px;max-width:100%;display:block;margin:0 auto;border-radius:10px"></canvas>
-<div style="margin-top:14px;font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.45;color:rgba(16,16,24,.55);word-break:break-all">{{ url }}</div>
 </div>
 </div>
 </sc-if>
@@ -209,6 +217,17 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <sc-for list="{{ lfSelect }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
 </select>
 </label>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Unterkapitel</span>
+<datalist id="amq-themen"><sc-for list="{{ themeSuggest }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}"></option></sc-for></datalist>
+<input list="amq-themen" value="{{ wT }}" onChange="{{ onWT }}" maxlength="60" placeholder="z. B. Rohrverbindungen" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;min-width:0" style-focus="border-color:oklch(0.72 0.16 55)">
+</label>
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Erstellt von</span>
+<input value="{{ wAu }}" onChange="{{ onWAu }}" maxlength="40" placeholder="Vorname" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;min-width:0" style-focus="border-color:oklch(0.72 0.16 55)">
+</label>
+</div>
 <label style="display:flex;flex-direction:column;gap:6px">
 <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Frage</span>
 <textarea value="{{ wFrage }}" onChange="{{ onWFrage }}" rows="3" maxlength="300" placeholder="z. B. Welcher Mindestabstand gilt beim freien Auslauf AA?" style="resize:vertical;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;line-height:1.45;outline:none" style-focus="border-color:oklch(0.72 0.16 55)"></textarea>
@@ -237,6 +256,12 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 </div>
 </div>
 <label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Bearbeitungszeit</span>
+<select value="{{ wZ }}" onChange="{{ onWZ }}" style="background:#1b1b26;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<sc-for list="{{ zeitSelect }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+</select>
+</label>
+<label style="display:flex;flex-direction:column;gap:6px">
 <span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Erklärung (optional)</span>
 <textarea value="{{ wE }}" onChange="{{ onWE }}" rows="2" maxlength="400" placeholder="Wird nach dem Beantworten angezeigt" style="resize:vertical;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:14.5px;line-height:1.45;outline:none" style-focus="border-color:oklch(0.72 0.16 55)"></textarea>
 </label>
@@ -247,6 +272,46 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <div style="background:oklch(0.72 0.16 155 / .15);border:1px solid oklch(0.72 0.16 155 / .5);border-radius:10px;padding:11px 14px;font-size:14px">{{ wOk }}</div>
 </sc-if>
 <button onClick="{{ saveWerk }}" style="background:oklch(0.72 0.16 55);color:#1a1408;border:none;border-radius:12px;padding:14px 22px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer" style-hover="background:oklch(0.78 0.16 55)">{{ saveLabel }}</button>
+</div>
+
+<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:24px 24px 26px;display:flex;flex-direction:column;gap:14px">
+<div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:19px">Excel-Datei importieren</div>
+<div style="font-size:13.5px;line-height:1.5;color:rgba(242,242,245,.65);margin-top:4px;text-wrap:pretty">Fragen, vier Antworten, richtige Antwort und Bearbeitungszeit pro Zeile. Leeres Zeitfeld = Standardzeit ({{ secs }} s).</div>
+</div>
+<a href="Quiz_Import_Vorlage.xlsx" download="Quiz_Import_Vorlage.xlsx" style="align-self:flex-start;font-size:13.5px">Vorlage herunterladen (.xlsx)</a>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Lernfeld für alle Fragen der Datei</span>
+<select value="{{ impLf }}" onChange="{{ onImpLf }}" style="background:#1b1b26;border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 12px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none" style-focus="border-color:oklch(0.72 0.16 55)">
+<sc-for list="{{ lfSelect }}" as="o" hint-placeholder-count="1"><option value="{{ o.v }}">{{ o.label }}</option></sc-for>
+</select>
+</label>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));gap:12px">
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Unterkapitel</span>
+<datalist id="amq-themen-imp"><sc-for list="{{ impThemeSuggest }}" as="o" hint-placeholder-count="0"><option value="{{ o.v }}"></option></sc-for></datalist>
+<input list="amq-themen-imp" value="{{ impT }}" onChange="{{ onImpT }}" maxlength="60" placeholder="z. B. Rohrverbindungen" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;min-width:0" style-focus="border-color:oklch(0.72 0.16 55)">
+</label>
+<label style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;opacity:.55">Erstellt von</span>
+<input value="{{ impAu }}" onChange="{{ onImpAu }}" maxlength="40" placeholder="Vorname" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.16);border-radius:10px;padding:12px 14px;color:#f2f2f5;font-family:'IBM Plex Sans',sans-serif;font-size:15px;outline:none;min-width:0" style-focus="border-color:oklch(0.72 0.16 55)">
+</label>
+</div>
+<div style="font-size:12.5px;line-height:1.45;color:rgba(242,242,245,.55);margin-top:-4px;text-wrap:pretty">Gilt für alle Fragen der Datei. Enthält die Datei die Spalten „Unterkapitel“ bzw. „Ersteller“, werden diese pro Zeile verwendet.</div>
+<label style="display:flex;align-items:center;justify-content:center;gap:10px;border:1px dashed rgba(255,255,255,.28);border-radius:12px;padding:16px;cursor:pointer;font-size:14.5px;text-align:center" style-hover="border-color:oklch(0.72 0.16 55)">
+<input type="file" accept=".xlsx,.xls,.csv" onChange="{{ onImpFile }}" style="display:none">
+<span>{{ impFileLabel }}</span>
+</label>
+<sc-if value="{{ impHasPreview }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:12px 14px;font-size:13.5px;line-height:1.45">
+<div style="font-weight:600">{{ impSummary }}</div>
+<sc-for list="{{ impErrs }}" as="er" hint-placeholder-count="0"><div style="color:oklch(0.78 0.14 30)">{{ er }}</div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ hasImpMsg }}" hint-placeholder-val="{{ false }}">
+<div style="background:{{ impMsgBg }};border:1px solid rgba(255,255,255,.18);border-radius:10px;padding:11px 14px;font-size:14px">{{ impMsg }}</div>
+</sc-if>
+<button onClick="{{ doImport }}" style="background:{{ impBtnBg }};color:#1a1408;border:none;border-radius:12px;padding:14px 22px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:15px;cursor:pointer">{{ impBtnLabel }}</button>
 </div>
 
 <div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:18px;padding:22px 22px 24px;display:flex;flex-direction:column;gap:16px">
@@ -262,15 +327,40 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 <sc-if value="{{ werkEmpty }}" hint-placeholder-val="{{ true }}">
 <div style="border:1px dashed rgba(255,255,255,.18);border-radius:12px;padding:22px;font-size:14px;line-height:1.5;color:rgba(242,242,245,.6);text-wrap:pretty">Noch keine eigenen Fragen in diesem Bereich. Die erste Frage erstellst du links.</div>
 </sc-if>
+<sc-if value="{{ showBulk }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:10px 12px">
+<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer">
+<input type="checkbox" checked="{{ allSel }}" onChange="{{ toggleAll }}" style="width:18px;height:18px;accent-color:oklch(0.72 0.16 55);cursor:pointer">
+<span>Alle angezeigten auswählen</span>
+</label>
+<span style="font-size:13px;color:rgba(242,242,245,.6);flex:1;min-width:90px">{{ selLabel }}</span>
+<div style="display:flex;gap:8px">
+<button type="button" onClick="{{ clearSel }}" disabled="{{ noSel }}" style="background:transparent;border:1px solid rgba(255,255,255,.18);opacity:{{ selOpacity }};border-radius:8px;padding:7px 12px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer">Abwählen</button>
+<button type="button" onClick="{{ bulkDelete }}" disabled="{{ noSel }}" style="background:transparent;border:1px solid oklch(0.62 0.20 25 / .6);opacity:{{ selOpacity }};border-radius:8px;padding:7px 12px;color:#f2f2f5;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer">Ausgewählte löschen</button>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ showTrash }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:oklch(0.72 0.16 55 / .10);border:1px solid oklch(0.72 0.16 55 / .4);border-radius:12px;padding:10px 12px">
+<span style="font-size:13.5px;flex:1;min-width:140px">{{ trashLabel }}</span>
+<button type="button" onClick="{{ undoDelete }}" style="background:oklch(0.72 0.16 55);border:none;color:#1a1408;border-radius:8px;padding:7px 12px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer">{{ undoLabel }}</button>
+</div>
+</sc-if>
 <sc-for list="{{ werkGroups }}" as="g" hint-placeholder-count="0">
 <div style="display:flex;flex-direction:column;gap:10px">
 <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:6px">
+<div style="display:flex;align-items:center;gap:9px;min-width:0">
+<sc-if value="{{ g.admin }}" hint-placeholder-val="{{ false }}"><input type="checkbox" checked="{{ g.sel }}" onChange="{{ g.onSel }}" title="Ganzes Lernfeld auswählen" style="width:17px;height:17px;accent-color:oklch(0.72 0.16 55);cursor:pointer;flex:0 0 auto"></sc-if>
 <span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:14.5px;color:oklch(0.82 0.13 75)">{{ g.title }}</span>
+</div>
 <span style="font-size:12px;opacity:.55;white-space:nowrap">{{ g.countLabel }}</span>
 </div>
 <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="0">
-<div style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
-<div style="font-weight:600;font-size:15px;line-height:1.4;text-wrap:pretty">{{ it.frage }}</div>
+<div style="background:{{ it.cardBg }};border:1px solid {{ it.cardBc }};border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:flex-start;gap:10px">
+<sc-if value="{{ it.admin }}" hint-placeholder-val="{{ false }}"><input type="checkbox" checked="{{ it.sel }}" onChange="{{ it.onSel }}" style="width:17px;height:17px;margin-top:3px;accent-color:oklch(0.72 0.16 55);cursor:pointer;flex:0 0 auto"></sc-if>
+<div style="font-weight:600;font-size:15px;line-height:1.4;text-wrap:pretty;min-width:0">{{ it.frage }}</div>
+</div>
 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:6px">
 <sc-for list="{{ it.answers }}" as="a" hint-placeholder-count="4">
 <div style="display:flex;align-items:center;gap:8px;background:{{ a.bg }};border:1px solid {{ a.bc }};border-radius:8px;padding:7px 10px;font-size:13px;line-height:1.35">
@@ -453,8 +543,8 @@ a{color:#7dd3c0}a:hover{color:#a7e8da}
 </div>
 </sc-if>
 
-<div style="width:100%;max-width:1000px;margin-top:auto;padding-top:28px;display:flex;justify-content:flex-end">
-<button onClick="{{ openImpressum }}" style="background:transparent;border:none;padding:4px 2px;color:rgba(242,242,245,.35);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline" style-hover="color:rgba(242,242,245,.7)">Impressum</button>
+<div style="width:100%;max-width:{{ footerMax }};margin-top:auto;padding-top:28px;display:flex;justify-content:flex-end">
+<button onClick="{{ openImpressum }}" style="background:transparent;border:none;padding:4px 0;color:rgba(242,242,245,.35);font-family:'IBM Plex Sans',sans-serif;font-size:11px;cursor:pointer;text-decoration:underline" style-hover="color:rgba(242,242,245,.7)">Impressum</button>
 </div>
 
 <sc-if value="{{ impressumOpen }}" hint-placeholder-val="{{ false }}">
@@ -527,16 +617,28 @@ const MAX_PER_TEAM = 4;
 function lread(key){ try { return JSON.parse(localStorage.getItem(key || LKEY) || '{}') || {}; } catch(e){ return {}; } }
 function lwrite(next, key){ try { localStorage.setItem(key || LKEY, JSON.stringify(next)); } catch(e){} }
 function lfList(){ const d = (typeof window!=='undefined') ? window.FRAGEN : null; return (d && d.lernfelder) ? d.lernfelder : []; }
-function poolFor(nr, werk){
-  const out = [];
-  if(nr !== 'werk'){
-    const sel = nr==='all' ? lfList() : lfList().filter(x=>x.nr===nr);
-    sel.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
+function parseSel(sel){
+  if(sel == null || sel === '') return null;
+  if(typeof sel === 'number') return {src:'b', lf:sel};
+  if(sel === 'all') return {src:'b', lf:'all'};
+  if(sel === 'werk') return {src:'w', lf:'all'};
+  const m = String(sel).match(/^([bw]):(all|\d+)(?:\|(.*))?$/);
+  if(!m) return null;
+  return {src:m[1], lf: m[2]==='all' ? 'all' : Number(m[2]), thema: m[3]};
+}
+function poolFor(sel, werk){
+  const p = parseSel(sel); const out = [];
+  if(!p) return out;
+  if(p.src === 'b'){
+    const sel2 = p.lf==='all' ? lfList() : lfList().filter(x=>x.nr===p.lf);
+    sel2.forEach(lf=>{ (lf.fragen||[]).forEach(f=>{
       out.push({c:'LF '+lf.nr+' · '+(f.thema||lf.titel), q:f.frage, o:f.antworten, a:f.korrekt, e:f.erklaerung||''});
     }); });
+    return out;
   }
   (werk||[]).forEach(w=>{
-    if(nr==='all' || nr==='werk' || w.lf===nr) out.push({c:'LF '+w.lf+' · Fragenwerkstatt', q:w.frage, o:w.antworten, a:w.korrekt, e:w.erklaerung||'Frage aus der Fragenwerkstatt.'});
+    if((p.lf==='all' || w.lf===p.lf) && (p.thema===undefined || (w.thema||'')===p.thema))
+      out.push({c:'LF '+w.lf+' · '+(w.thema||'Fragenwerkstatt'), q:w.frage, o:w.antworten, a:w.korrekt, e:w.erklaerung||'Frage aus der Fragenwerkstatt.', s:w.zeit||0});
   });
   return out;
 }
@@ -547,12 +649,13 @@ function mulberry32(a){ return function(){ a|=0; a=a+0x6D2B79F5|0; let t=Math.im
 
 class Component extends DCLogic {
   state = {screen:'join', idx:0, score:0, streak:0, picked:null, t:0, deck:[], correct:0, name:'', best:0, url:'', mode:'solo', myId:'', players:{}, seed:0, room:'', roomInput:'', conn:'off', lf:null,
-    wLf:'', wFrage:'', wA:['','','',''], wK:null, wE:'', editId:null, wErr:'', wOk:'', wFilter:'all', confirmDel:null,
+    wLf:'', wFrage:'', wA:['','','',''], wK:null, wE:'', wZ:'', wT:'', wAu:'', impT:'', impAu:'', impLf:'', impRows:null, impErrs:[], impFile:'', impMsg:'', impOk:false, impBusy:false, editId:null, wErr:'', wOk:'', wFilter:'all', confirmDel:null, sel:{}, lastDel:[],
     werkRev:0, werkSrc:'connecting', isAdmin:false, loginOpen:false, lUser:'', lPass:'', lErr:''};
   werk = {};
   _wseen = {};
   qrRef = React.createRef();
   lobbyQrRef = React.createRef();
+  qrBigRef = React.createRef();
   netPlayers = {};
   netGame = null;
 
@@ -777,7 +880,7 @@ class Component extends DCLogic {
     const games = [st.game, this.netGame].filter(g=>g && g.seed && (g.at||0) > (this._lobbyAt||0) && now - (g.at||0) < 45000);
     const game = games.sort((a,b)=>(b.at||0)-(a.at||0))[0];
     if(game && game.seed !== this.state.seed && this.state.screen==='lobby' && players[this.state.myId]){
-      const lf = (game.lf === 'all' || game.lf === 'werk' || typeof game.lf === 'number') ? game.lf : this.state.lf;
+      const lf = parseSel(game.lf) ? game.lf : this.state.lf;
       this.setState({lf}, ()=>this.beginGame(game.seed, game.deck));
     }
   }
@@ -863,11 +966,28 @@ class Component extends DCLogic {
     this.mutate(s=>{ if(s.players && s.players[this.state.myId]){ s.players[this.state.myId].score = 0; s.players[this.state.myId].ts = Date.now(); } return s; });
   }
   drawQr(){
-    const pairs = [[this.qrRef.current, this.state.url], [this.lobbyQrRef.current, this.roomLink()]];
+    const pairs = [[this.qrRef.current, this.state.url], [this.lobbyQrRef.current, this.roomLink()], [this.qrBigRef.current, this.state.url]];
     pairs.forEach(([c, value])=>{
       if(!c || !window.QRious || !value || c.dataset.done === value) return;
       c.dataset.done = value;
-      try { new window.QRious({element:c, value, size:220, padding:6, background:'#ffffff', foreground:'#101018', level:'M'}); } catch(e){}
+      try {
+        const size = c.width || 220;
+        const tmp = document.createElement('canvas');
+        new window.QRious({element:tmp, value, size, padding:0, background:'#ffffff', foreground:'#101018', level:'M'});
+        // QRious rundet die Modulgröße ab und lässt den Rest rechts/unten frei → Code zuschneiden und mittig zeichnen
+        const tc = tmp.getContext('2d'), d = tc.getImageData(0, 0, tmp.width, tmp.height).data;
+        let minX = tmp.width, minY = tmp.height, maxX = -1, maxY = -1;
+        for(let y = 0; y < tmp.height; y++) for(let x = 0; x < tmp.width; x++){
+          if(d[(y*tmp.width + x)*4] < 128){ if(x<minX)minX=x; if(x>maxX)maxX=x; if(y<minY)minY=y; if(y>maxY)maxY=y; }
+        }
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+        if(maxX < 0) return;
+        const w = maxX - minX + 1, h = maxY - minY + 1;
+        const margin = Math.round(c.width * 0.04), target = c.width - 2*margin;
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(tmp, minX, minY, w, h, margin, margin, target, target);
+      } catch(e){}
     });
   }
   roomLink(){ return this.state.url ? (this.state.url + '#join') : ''; }
@@ -985,7 +1105,10 @@ class Component extends DCLogic {
     const frage = (s.wFrage||'').trim();
     const ans = s.wA.map(a=>(a||'').trim());
     let err = '';
+    const thema = (s.wT||'').trim(), autor = (s.wAu||'').trim();
     if(!lf) err = 'Bitte ein Lernfeld wählen.';
+    else if(!thema) err = 'Bitte ein Unterkapitel eingeben.';
+    else if(!autor) err = 'Bitte eintragen, wer die Frage erstellt hat.';
     else if(frage.length < 8) err = 'Bitte eine vollständige Frage eingeben.';
     else if(ans.some(a=>!a)) err = 'Bitte alle vier Antworten ausfüllen.';
     else if(new Set(ans.map(a=>a.toLowerCase())).size < 4) err = 'Die vier Antworten müssen sich unterscheiden.';
@@ -997,55 +1120,184 @@ class Component extends DCLogic {
     const now = Date.now();
     this.saveWerkItem({
       id, lf, frage: frage.slice(0,300), antworten: ans.map(a=>a.slice(0,160)), korrekt: s.wK,
-      erklaerung: (s.wE||'').trim().slice(0,400), ts: now,
+      erklaerung: (s.wE||'').trim().slice(0,400), zeit: Number(s.wZ)||0, thema: thema.slice(0,60), autor: autor.slice(0,40), ts: now,
       created: editing ? (editing.created || editing.ts || now) : now,
       editedBy: editing ? 'Lehrkraft' : ''
     });
-    this.setState({wFrage:'', wA:['','','',''], wK:null, wE:'', editId:null, wErr:'',
+    this.setState({wFrage:'', wA:['','','',''], wK:null, wE:'', wZ:'', editId:null, wErr:'',
       wOk: editing ? 'Änderungen gespeichert.' : ('Frage gespeichert – sie ist jetzt in LF ' + lf + ' spielbar.')});
   };
   editWerk(id){
     if(!this.state.isAdmin) return;
     const q = this.werk[id]; if(!q) return;
-    this.setState({editId:id, wLf:String(q.lf), wFrage:q.frage, wA:q.antworten.slice(), wK:q.korrekt, wE:q.erklaerung||'', wErr:'', wOk:'', confirmDel:null});
+    this.setState({editId:id, wLf:String(q.lf), wFrage:q.frage, wA:q.antworten.slice(), wK:q.korrekt, wE:q.erklaerung||'', wZ:q.zeit ? String(q.zeit) : '', wT:q.thema||'', wAu:q.autor||'', wErr:'', wOk:'', confirmDel:null});
     try { window.scrollTo({top:0, behavior:'smooth'}); } catch(e){}
   }
-  cancelEdit = ()=> this.setState({editId:null, wFrage:'', wA:['','','',''], wK:null, wE:'', wErr:'', wOk:''});
+  cancelEdit = ()=> this.setState({editId:null, wFrage:'', wA:['','','',''], wK:null, wE:'', wZ:'', wErr:'', wOk:''});
   deleteWerk(id){
     if(!this.state.isAdmin) return;
     if(this.state.confirmDel !== id){ this.setState({confirmDel:id}); return; }
-    const tomb = {id, deleted:true, ts:Date.now()};
+    const tomb = this.tombFor(id, Date.now());
     this.werk[id] = tomb;
     this.saveWerkCache();
     this.werkPublish(tomb);
-    this.setState({confirmDel:null, werkRev:Date.now(), editId: this.state.editId===id ? null : this.state.editId});
+    this.setState({confirmDel:null, lastDel:[id], werkRev:Date.now(), editId: this.state.editId===id ? null : this.state.editId});
   }
+  toggleSel(ids, on){
+    const sel = Object.assign({}, this.state.sel);
+    ids.forEach(id=>{ if(on) sel[id] = 1; else delete sel[id]; });
+    this.setState({sel});
+  }
+  tombFor(id, now){
+    const q = this.werk[id]; const backup = Object.assign({}, q); delete backup.id; delete backup.deleted; delete backup.backup;
+    return {id, deleted:true, ts:now, backup};
+  }
+  bulkDelete = ()=>{
+    if(!this.state.isAdmin) return;
+    const ids = Object.keys(this.state.sel).filter(id=>this.werk[id] && !this.werk[id].deleted);
+    if(!ids.length) return;
+    let ok = false;
+    try { ok = window.confirm(ids.length + (ids.length===1 ? ' Frage' : ' Fragen') + ' wirklich löschen?\n\nDie Fragen verschwinden auf allen Geräten. Über „Rückgängig“ bzw. den Papierkorb lassen sie sich wiederherstellen.'); } catch(e){ ok = false; }
+    if(!ok) return;
+    const now = Date.now();
+    ids.forEach((id, i)=>{ const tomb = this.tombFor(id, now+i); this.werk[id] = tomb; this.werkPublish(tomb); });
+    this.saveWerkCache();
+    this.setState({sel:{}, lastDel:ids, confirmDel:null, werkRev:Date.now(), editId: ids.includes(this.state.editId) ? null : this.state.editId});
+  };
+  restoreIds(ids){
+    if(!this.state.isAdmin) return;
+    const now = Date.now();
+    ids.forEach((id, i)=>{
+      const t = this.werk[id];
+      if(!t || !t.deleted || !t.backup || !t.backup.frage) return;
+      const q = Object.assign({}, t.backup, {id, ts:now+i});
+      this.werk[id] = q; this.werkPublish(q);
+    });
+    this.saveWerkCache();
+    this.setState({lastDel:[], werkRev:Date.now()});
+  }
+  undoDelete = ()=>{
+    const ids = this.state.lastDel.length ? this.state.lastDel : Object.values(this.werk).filter(t=>t && t.deleted && t.backup && t.backup.frage).map(t=>t.id);
+    this.restoreIds(ids);
+  };
   doLogin = ()=>{
     if(this.state.lUser.trim()==='Lehrer' && this.state.lPass==='Lehrer'){
       try { sessionStorage.setItem('amq-admin','1'); } catch(e){}
       this.setState({isAdmin:true, loginOpen:false, lUser:'', lPass:'', lErr:''});
     } else this.setState({lErr:'Benutzername oder Passwort falsch.'});
   };
-  logout = ()=>{ try { sessionStorage.removeItem('amq-admin'); } catch(e){} this.setState({isAdmin:false, editId:null, confirmDel:null}); };
+  logout = ()=>{ try { sessionStorage.removeItem('amq-admin'); } catch(e){} this.setState({isAdmin:false, editId:null, confirmDel:null, sel:{}, lastDel:[]}); };
   exportWerk = ()=>{
     const list = this.werkList().sort((a,b)=>a.lf-b.lf);
-    const data = {titel:'Fragenwerkstatt', exportiert:new Date().toISOString(), fragen:list.map(q=>({lernfeld:q.lf, frage:q.frage, antworten:q.antworten, korrekt:q.korrekt, erklaerung:q.erklaerung||''}))};
+    const data = {titel:'Fragenwerkstatt', exportiert:new Date().toISOString(), fragen:list.map(q=>({lernfeld:q.lf, frage:q.frage, antworten:q.antworten, korrekt:q.korrekt, zeit:q.zeit||this.secs, unterkapitel:q.thema||'', ersteller:q.autor||'', erklaerung:q.erklaerung||''}))};
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json'}));
     a.download = 'fragenwerkstatt.json';
     document.body.appendChild(a); a.click(); a.remove();
   };
+  loadXlsx(){
+    if(window.XLSX) return Promise.resolve(window.XLSX);
+    if(this._xlsxP) return this._xlsxP;
+    this._xlsxP = new Promise((res, rej)=>{
+      const sc = document.createElement('script');
+      sc.src = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
+      sc.onload = ()=> window.XLSX ? res(window.XLSX) : rej();
+      sc.onerror = ()=>{ this._xlsxP = null; rej(); };
+      document.head.appendChild(sc);
+    });
+    return this._xlsxP;
+  }
+  onImpFile = async e=>{
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    this.setState({impBusy:true, impFile:file.name, impRows:null, impErrs:[], impMsg:''});
+    try {
+      const X = await this.loadXlsx();
+      const wb = X.read(await file.arrayBuffer(), {type:'array'});
+      const ws = wb.Sheets['Fragen'] || wb.Sheets[wb.SheetNames[0]];
+      const grid = X.utils.sheet_to_json(ws, {header:1, defval:'', raw:true, blankrows:true});
+      this.parseImport(grid);
+    } catch(err){
+      this.setState({impBusy:false, impRows:null, impErrs:[], impOk:false, impMsg:'Die Datei konnte nicht gelesen werden. Bitte als .xlsx speichern und erneut versuchen (Internetverbindung nötig).'});
+    }
+  };
+  parseImport(grid){
+    const str = v => String(v == null ? '' : v).replace(/\s+/g,' ').trim();
+    // Kopfzeile suchen (Spalte mit "Frage" und "Antwort 1"), sonst Vorlage-Standard: Zeile 8, Spalten B–H
+    let hr = -1, col = {};
+    for(let r = 0; r < Math.min(grid.length, 30) && hr < 0; r++){
+      const row = (grid[r]||[]).map(c=>str(c).toLowerCase());
+      const fi = row.findIndex(c=>/^frage/.test(c));
+      const a1 = row.findIndex(c=>/^antwort\s*1/.test(c));
+      if(fi >= 0 && a1 >= 0){
+        hr = r;
+        col = {f:fi, a:[a1, row.findIndex(c=>/^antwort\s*2/.test(c)), row.findIndex(c=>/^antwort\s*3/.test(c)), row.findIndex(c=>/^antwort\s*4/.test(c))],
+          z: row.findIndex(c=>/zeit/.test(c)), k: row.findIndex(c=>/richtig|korrekt|l(ö|oe)sung/.test(c)), e: row.findIndex(c=>/erkl/.test(c)), t: row.findIndex(c=>/unterkapitel|thema|kapitel/.test(c)), au: row.findIndex(c=>/ersteller|erstellt|autor/.test(c))};
+      }
+    }
+    if(hr < 0){ hr = 7; col = {f:1, a:[2,3,4,5], z:6, k:7, e:-1, t:-1, au:-1}; }
+    if(col.a.some(i=>i<0)) col.a = [col.f+1, col.f+2, col.f+3, col.f+4];
+    const EX = 'Mit welchem Werkzeug wird ein Kupferrohr nach dem Ablängen innen entgratet?';
+    const rows = [], errs = [];
+    for(let r = hr+1; r < grid.length; r++){
+      const g = grid[r] || [];
+      const frage = str(g[col.f]);
+      if(!frage) continue;
+      if(frage === EX) continue;
+      const ans = col.a.map(i=>str(g[i]));
+      const kRaw = col.k >= 0 ? str(g[col.k]) : '';
+      const k = parseInt(kRaw, 10);
+      const zRaw = col.z >= 0 ? str(g[col.z]) : '';
+      const z = parseInt(zRaw, 10);
+      const zeile = 'Zeile ' + (r+1) + ': ';
+      if(ans.some(a=>!a)){ errs.push(zeile + 'nicht alle vier Antworten ausgefüllt.'); continue; }
+      if(new Set(ans.map(a=>a.toLowerCase())).size < 4){ errs.push(zeile + 'Antworten sind doppelt.'); continue; }
+      if(!(k >= 1 && k <= 4)){ errs.push(zeile + 'richtige Antwort muss 1–4 sein.'); continue; }
+      if(zRaw && !(z >= 5 && z <= 600)){ errs.push(zeile + 'Zeit ungültig (5–600 s) – Standardzeit wird verwendet.'); }
+      rows.push({frage: frage.slice(0,300), antworten: ans.map(a=>a.slice(0,160)), korrekt: k-1, zeit: (z >= 5 && z <= 600) ? z : 0, erklaerung: col.e >= 0 ? str(g[col.e]).slice(0,400) : '', thema: col.t >= 0 ? str(g[col.t]).slice(0,60) : '', autor: col.au >= 0 ? str(g[col.au]).slice(0,40) : ''});
+    }
+    this.setState({impBusy:false, impRows:rows, impErrs:errs.slice(0,8).concat(errs.length > 8 ? ['… und ' + (errs.length-8) + ' weitere Hinweise'] : []), impMsg: rows.length ? '' : 'Keine gültigen Fragen gefunden.', impOk:false});
+  }
+  doImport = ()=>{
+    const s = this.state, lf = Number(s.impLf);
+    if(!s.impRows || !s.impRows.length){ this.setState({impMsg:'Bitte zuerst eine Excel-Datei auswählen.', impOk:false}); return; }
+    if(!lf){ this.setState({impMsg:'Bitte ein Lernfeld für die Fragen wählen.', impOk:false}); return; }
+    const dT = (s.impT||'').trim().slice(0,60), dAu = (s.impAu||'').trim().slice(0,40);
+    if(!dT && s.impRows.some(r=>!r.thema)){ this.setState({impMsg:'Bitte ein Unterkapitel eingeben.', impOk:false}); return; }
+    if(!dAu && s.impRows.some(r=>!r.autor)){ this.setState({impMsg:'Bitte eintragen, wer die Fragen erstellt hat.', impOk:false}); return; }
+    const have = new Set(this.werkList().filter(q=>q.lf===lf).map(q=>q.frage.toLowerCase()));
+    let n = 0, dup = 0;
+    const base = Date.now();
+    s.impRows.forEach((r, i)=>{
+      if(have.has(r.frage.toLowerCase())){ dup++; return; }
+      have.add(r.frage.toLowerCase());
+      const now = base + i;
+      const q = Object.assign({id:'w' + now.toString(36) + Math.random().toString(36).slice(2,6), lf, ts:now, created:now, editedBy:'', quelle:'Excel-Import'}, r, {thema: r.thema || dT, autor: r.autor || dAu});
+      this.werk[q.id] = q;
+      this.werkPublish(q);
+      n++;
+    });
+    this.saveWerkCache();
+    this.setState({werkRev:Date.now(), impRows:null, impErrs:[], impFile:'', impOk:true,
+      impMsg: n + (n===1 ? ' Frage' : ' Fragen') + ' in LF ' + lf + ' importiert' + (dup ? ' (' + dup + ' bereits vorhanden, übersprungen)' : '') + '.'});
+  };
   werkVals(){
     const s = this.state, lfs = lfList(), list = this.werkList();
     const nrs = lfs.length ? lfs.map(l=>l.nr) : Array.from({length:15}, (_,i)=>i+1);
     const lfTitle = nr => (lfs.find(l=>l.nr===nr)||{}).titel || '';
-    const shown = s.wFilter==='all' ? nrs : nrs.filter(n=>n===Number(s.wFilter));
+    const [fLf, fT] = String(s.wFilter).split('|');
+    const shown = s.wFilter==='all' ? nrs : nrs.filter(n=>n===Number(fLf));
+    const themesOf = nr => Array.from(new Set(list.filter(q=>q.lf===nr && q.thema).map(q=>q.thema))).sort((a,b)=>a.localeCompare(b,'de'));
     const fmt = ts => { try { return new Date(ts).toLocaleDateString('de-DE'); } catch(e){ return ''; } };
     const groups = shown.map(nr=>{
-      const items = list.filter(q=>q.lf===nr).sort((a,b)=>(b.created||b.ts||0)-(a.created||a.ts||0));
+      const items = list.filter(q=>q.lf===nr && (fT === undefined || (q.thema||'') === fT)).sort((a,b)=>(b.created||b.ts||0)-(a.created||a.ts||0));
       return {
-        title: 'LF ' + nr + (lfTitle(nr) ? ' · ' + lfTitle(nr) : ''),
+        title: 'LF ' + nr + (lfTitle(nr) ? ' · ' + lfTitle(nr) : '') + (fT !== undefined ? ' › ' + fT : ''),
         countLabel: items.length + (items.length===1 ? ' Frage' : ' Fragen'),
+        admin: !!s.isAdmin,
+        sel: items.length > 0 && items.every(q=>s.sel[q.id]),
+        onSel: e=>this.toggleSel(items.map(q=>q.id), e.target.checked),
         items: items.map(q=>({
           frage: q.frage, erkl: q.erklaerung || '', hasErkl: !!q.erklaerung,
           answers: q.antworten.map((a,i)=>({
@@ -1053,14 +1305,20 @@ class Component extends DCLogic {
             bg: i===q.korrekt ? 'oklch(0.72 0.16 155 / .16)' : 'rgba(255,255,255,.035)',
             bc: i===q.korrekt ? 'oklch(0.72 0.16 155 / .6)' : 'rgba(255,255,255,.08)'
           })),
-          meta: 'Erstellt am ' + fmt(q.created || q.ts) + (q.editedBy ? ' · bearbeitet von der Lehrkraft' : ''),
+          meta: (q.thema ? q.thema + ' · ' : '') + (q.zeit ? q.zeit + ' s' : 'Standardzeit') + ' · Erstellt' + (q.autor ? ' von ' + q.autor : '') + ' am ' + fmt(q.created || q.ts) + (q.editedBy ? ' · bearbeitet von der Lehrkraft' : ''),
           admin: !!s.isAdmin,
+          sel: !!s.sel[q.id], onSel: e=>this.toggleSel([q.id], e.target.checked),
+          cardBg: s.sel[q.id] ? 'oklch(0.72 0.16 55 / .10)' : 'rgba(255,255,255,.04)',
+          cardBc: s.sel[q.id] ? 'oklch(0.72 0.16 55 / .55)' : 'rgba(255,255,255,.09)',
           onEdit: ()=>this.editWerk(q.id), onDelete: ()=>this.deleteWerk(q.id),
           delLabel: s.confirmDel===q.id ? 'Wirklich löschen?' : 'Löschen',
           delBg: s.confirmDel===q.id ? 'oklch(0.55 0.18 25)' : 'transparent'
         }))
       };
     }).filter(g=>g.items.length);
+    const visIds = shown.reduce((acc, nr)=>acc.concat(list.filter(q=>q.lf===nr).map(q=>q.id)), []);
+    const selIds = Object.keys(s.sel||{}).filter(id=>this.werk[id] && !this.werk[id].deleted);
+    const trashN = Object.values(this.werk).filter(t=>t && t.deleted && t.backup && t.backup.frage).length;
     const src = s.werkSrc;
     const kb = i => s.wK===i ? 'oklch(0.72 0.16 155)' : 'transparent';
     const kc = i => s.wK===i ? '#08150f' : 'rgba(242,242,245,.7)';
@@ -1069,11 +1327,25 @@ class Component extends DCLogic {
       isWerk: s.screen==='werkstatt', showWerkBtn: s.screen==='join',
       openWerk: this.openWerk, closeWerk: this.closeWerk,
       werkGroups: groups, werkEmpty: groups.length===0,
+      showBulk: !!s.isAdmin && groups.length > 0,
+      allSel: visIds.length > 0 && visIds.every(id=>s.sel[id]),
+      toggleAll: e=>this.toggleSel(visIds, e.target.checked),
+      hasSel: selIds.length > 0, noSel: selIds.length === 0, selOpacity: selIds.length ? 1 : 0.4,
+      showTrash: !!s.isAdmin && trashN > 0,
+      trashLabel: s.lastDel.length ? (s.lastDel.length + (s.lastDel.length===1 ? ' Frage gelöscht.' : ' Fragen gelöscht.')) : ('Papierkorb: ' + trashN + (trashN===1 ? ' gelöschte Frage' : ' gelöschte Fragen')),
+      undoLabel: s.lastDel.length ? 'Rückgängig' : 'Alle wiederherstellen',
+      undoDelete: this.undoDelete,
+      selLabel: selIds.length ? (selIds.length + (selIds.length===1 ? ' Frage ausgewählt' : ' Fragen ausgewählt')) : 'Fragen zum Löschen anhaken',
+      clearSel: ()=>this.setState({sel:{}}),
+      bulkDelete: this.bulkDelete,
       werkTotal: list.length + (list.length===1 ? ' eigene Frage' : ' eigene Fragen'),
-      werkSrcLabel: src==='firebase' ? 'Dauerhaft gespeichert in Firebase – auf allen Geräten sichtbar' : src==='mqtt' ? ('Online geteilt über ' + (this._wnets||[]).filter(x=>x.live).length + ' von 3 Servern – ohne Firebase keine Speichergarantie') : src==='local' ? 'Offline – nur auf diesem Gerät gespeichert' : 'Verbinde…',
+      werkSrcLabel: (src==='firebase' || src==='mqtt') ? 'Online' : src==='local' ? 'Offline – nur auf diesem Gerät gespeichert' : 'Verbinde…',
       werkSrcColor: (src==='firebase'||src==='mqtt') ? 'oklch(0.80 0.15 160)' : src==='local' ? 'oklch(0.72 0.17 30)' : 'oklch(0.80 0.15 75)',
       lfSelect: [{v:'', label:'Lernfeld wählen …'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + (lfTitle(n) ? ' · ' + lfTitle(n) : '')}))),
-      filterSelect: [{v:'all', label:'Alle Lernfelder'}].concat(nrs.map(n=>({v:String(n), label:'LF ' + n + ' (' + list.filter(q=>q.lf===n).length + ')'}))),
+      filterSelect: [{v:'all', label:'Alle Lernfelder'}].concat(nrs.reduce((acc, n)=>acc.concat([{v:String(n), label:'LF ' + n + ' (' + list.filter(q=>q.lf===n).length + ')'}], themesOf(n).map(t=>{ const qs = list.filter(q=>q.lf===n && q.thema===t); const au = Array.from(new Set(qs.map(q=>(q.autor||'').trim()).filter(Boolean)));
+        return {v:n + '|' + t, label:'\u00a0\u00a0\u00a0› ' + t + (au.length ? ' – von ' + au.join(', ') : '') + ' (' + qs.length + ')'}; })), [])),
+      themeSuggest: (Number(s.wLf) ? themesOf(Number(s.wLf)) : Array.from(new Set(list.map(q=>q.thema).filter(Boolean)))).map(t=>({v:t})),
+      impThemeSuggest: (Number(s.impLf) ? themesOf(Number(s.impLf)) : Array.from(new Set(list.map(q=>q.thema).filter(Boolean)))).map(t=>({v:t})),
       wLf: s.wLf, wFrage: s.wFrage, wE: s.wE, wFilter: s.wFilter,
       wA0: s.wA[0], wA1: s.wA[1], wA2: s.wA[2], wA3: s.wA[3],
       onWLf: e=>this.setState({wLf:e.target.value, wErr:'', wOk:''}),
@@ -1086,6 +1358,22 @@ class Component extends DCLogic {
       kc0: kc(0), kc1: kc(1), kc2: kc(2), kc3: kc(3),
       kl0: kl(0), kl1: kl(1), kl2: kl(2), kl3: kl(3),
       saveWerk: this.saveWerk, cancelEdit: this.cancelEdit,
+      wZ: s.wZ, onWZ: e=>this.setState({wZ:e.target.value}),
+      wT: s.wT, onWT: e=>this.setState({wT:e.target.value, wErr:'', wOk:''}),
+      wAu: s.wAu, onWAu: e=>this.setState({wAu:e.target.value, wErr:'', wOk:''}),
+      impT: s.impT, onImpT: e=>this.setState({impT:e.target.value, impMsg:''}),
+      impAu: s.impAu, onImpAu: e=>this.setState({impAu:e.target.value, impMsg:''}),
+      zeitSelect: [{v:'', label:'Standard (' + this.secs + ' Sekunden)'}].concat([5,10,15,20,30,45,60,90,120,180,240].map(z=>({v:String(z), label: z + ' Sekunden'}))),
+      impLf: s.impLf, onImpLf: e=>this.setState({impLf:e.target.value, impMsg:''}),
+      onImpFile: this.onImpFile, doImport: this.doImport,
+      impFileLabel: s.impBusy ? 'Datei wird gelesen …' : s.impFile ? (s.impFile + ' – andere Datei wählen') : 'Excel-Datei auswählen (.xlsx)',
+      impHasPreview: !!s.impRows,
+      impSummary: s.impRows ? (s.impRows.length + (s.impRows.length===1 ? ' gültige Frage' : ' gültige Fragen') + ' erkannt' + (s.impErrs.length ? ' · Hinweise:' : '')) : '',
+      impErrs: s.impErrs || [],
+      impMsg: s.impMsg, hasImpMsg: !!s.impMsg,
+      impMsgBg: s.impOk ? 'oklch(0.72 0.16 155 / .15)' : 'oklch(0.55 0.18 25 / .18)',
+      impBtnLabel: s.impRows && s.impRows.length ? (s.impRows.length + ' Fragen importieren') : 'Importieren',
+      impBtnBg: s.impRows && s.impRows.length ? 'oklch(0.72 0.16 55)' : 'oklch(0.72 0.16 55 / .45)',
       isEditing: !!s.editId,
       formTitle: s.editId ? 'Frage bearbeiten' : 'Neue Frage erstellen',
       saveLabel: s.editId ? 'Änderungen speichern' : 'Frage speichern',
@@ -1111,6 +1399,7 @@ class Component extends DCLogic {
   }
 
   get secs(){ return Math.round(this.props.timerSeconds ?? 25); }
+  get qSecs(){ const d = (this.state.deck||[])[this.state.idx]; const v = d && Number(d.s); return (v >= 5 && v <= 600) ? Math.round(v) : this.secs; }
   get pool(){ return poolFor(this.state.lf, this.werkList()); }
   get count(){ return Math.max(1, Math.min(Math.round(this.props.questionCount ?? 20), this.pool.length)); }
 
@@ -1122,7 +1411,7 @@ class Component extends DCLogic {
     const picked = (this.props.shuffleQuestions ?? true) ? this.shuffle(all, rnd) : all.slice();
     return picked.slice(0, this.count).map(item=>{
       const idxs = this.shuffle([0,1,2,3], rnd);
-      return {c:item.c||'', q:item.q||'', e:item.e||'', o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a)};
+      return {c:item.c||'', q:item.q||'', e:item.e||'', o:idxs.map(i=>item.o[i]), a:idxs.indexOf(item.a), s:item.s||0};
     });
   }
 
@@ -1133,8 +1422,8 @@ class Component extends DCLogic {
   pickLf = nr => ()=>{ if(lfList().length) this.setState({lf:nr}); };
   tick = ()=>{
     clearInterval(this._iv);
-    this._deadline = Date.now() + this.secs*1000;
-    this.setState({t:this.secs*10, picked:null});
+    this._deadline = Date.now() + this.qSecs*1000;
+    this.setState({t:this.qSecs*10, picked:null});
     this._iv = setInterval(()=>{
       if(this.state.picked !== null){ clearInterval(this._iv); return; }
       const left = Math.max(0, this._deadline - Date.now());
@@ -1149,7 +1438,7 @@ class Component extends DCLogic {
     const ok = i===q.a;
     this.setState(s=>{
       const streak = ok ? s.streak+1 : 0;
-      const pts = ok ? Math.round(600 + 400*(s.t/(this.secs*10))) + Math.min(streak-1,5)*50 : 0;
+      const pts = ok ? Math.round(600 + 400*(s.t/(this.qSecs*10))) + Math.min(streak-1,5)*50 : 0;
       return {picked:i, streak, score:s.score+pts, correct:s.correct+(ok?1:0), gain:pts, hist:(s.hist||[]).concat(ok?1:0)};
     });
     if(this.state.mode==='team') setTimeout(()=>this.heartbeat(), 30);
@@ -1223,6 +1512,22 @@ class Component extends DCLogic {
       leaveLobby: this.leaveLobby, resetLobby: this.resetLobby, startTeamGame: this.startTeamGame,
       lobbyQrRef: this.lobbyQrRef, nameOk, playerTotal: ids.length,
       room: s.room, roomLink: this.roomLink(), joinAsGuest: this.joinAsGuest,
+      bookValue: (s.lf != null && String(s.lf).startsWith('b:')) ? String(s.lf) : '',
+      werkValue: (s.lf != null && String(s.lf).startsWith('w:')) ? String(s.lf) : '',
+      onPickBook: e=>{ const v = e.target.value; this.setState({lf: v === '' ? null : v}); },
+      onPickWerk: e=>{ const v = e.target.value; this.setState({lf: v === '' ? null : v}); },
+      bookBc: (s.lf != null && String(s.lf).startsWith('b:')) ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.16)',
+      werkSelBc: (s.lf != null && String(s.lf).startsWith('w:')) ? 'oklch(0.72 0.16 55)' : 'rgba(255,255,255,.16)',
+      bookOpts: [{v:'b:all', label:'Alle Lernfelder gemischt (' + poolFor('b:all').length + ')'}].concat(lfList().map(l=>({v:'b:'+l.nr, label:'LF ' + l.nr + ' · ' + l.titel + ' (' + (l.fragen||[]).length + ')'}))),
+      werkOpts: werk.length ? [{v:'w:all', label:'Alle Fragen der Fragenwerkstatt (' + werk.length + ')', dis:false}].concat(
+        Array.from(new Set(werk.map(w=>w.lf))).sort((a,b)=>a-b).reduce((acc, nr)=>{
+          const inLf = werk.filter(w=>w.lf===nr);
+          const t = (lfList().find(l=>l.nr===nr)||{}).titel || '';
+          const themes = Array.from(new Set(inLf.map(w=>w.thema).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'de'));
+          return acc.concat([{v:'w:'+nr, label:'LF ' + nr + (t ? ' · ' + t : '') + ' (' + inLf.length + ')', dis:false}],
+            themes.map(th=>{ const qs = inLf.filter(w=>w.thema===th); const au = Array.from(new Set(qs.map(w=>(w.autor||'').trim()).filter(Boolean)));
+              return {v:'w:'+nr+'|'+th, label:'\u00a0\u00a0\u00a0› ' + th + (au.length ? ' – von ' + au.join(', ') : '') + ' (' + qs.length + ')', dis:false}; }));
+        }, [])) : [{v:'w:none', label:'Noch keine Fragen vorhanden', dis:true}],
       lfOptions: lfList().map(l=>({
         nr:'LF '+l.nr, titel:l.titel, count:((l.fragen||[]).length + werk.filter(w=>w.lf===l.nr).length)+' Fragen',
         bg: s.lf===l.nr ? 'rgba(255,255,255,.14)' : 'rgba(255,255,255,.04)',
@@ -1243,7 +1548,10 @@ class Component extends DCLogic {
       dataWaiting: !lfList().length,
       readyOpacity: (s.lf != null && this.pool.length) ? 1 : 0.42,
       readyCursor: (s.lf != null && this.pool.length) ? 'pointer' : 'not-allowed',
-      lfLabel: s.lf === 'all' ? 'Alle Lernfelder' : s.lf === 'werk' ? 'Fragen aus der Fragenwerkstatt' : (s.lf != null ? ('LF ' + s.lf + ' · ' + ((lfList().find(l=>l.nr===s.lf)||{}).titel||'')) : 'Noch kein Lernfeld gewählt'),
+      lfLabel: (()=>{ const p = parseSel(s.lf); if(!p) return 'Noch nichts gewählt';
+        const t = p.lf==='all' ? '' : ((lfList().find(l=>l.nr===p.lf)||{}).titel||'');
+        const base = p.lf==='all' ? 'Alle Lernfelder' : ('LF ' + p.lf + (t ? ' · ' + t : ''));
+        return (p.src==='w' ? 'Fragenwerkstatt · ' : 'Fachbuch · ') + base + (p.thema ? ' › ' + p.thema : ''); })(),
       poolSize: this.pool.length,
       wanted: Math.round(this.props.questionCount ?? 20),
       connLabel: s.conn==='online' ? 'Online verbunden' : s.conn==='connecting' ? 'Verbinde…' : 'Offline – nur dieses Gerät',
@@ -1264,7 +1572,10 @@ class Component extends DCLogic {
       c0: T[0].count+'/4', c1: T[1].count+'/4', c2: T[2].count+'/4', c3: T[3].count+'/4',
       join0: this.joinTeam(0), join1: this.joinTeam(1), join2: this.joinTeam(2), join3: this.joinTeam(3),
       standings,
-      score: s.score, total, secs: this.secs, best: s.best, url: s.url, qrRef: this.qrRef,
+      inGame: s.screen==='play',
+      footerMax: s.screen==='join' ? '760px' : '1000px',
+      score: s.score, total, secs: this.secs, best: s.best, url: s.url, qrRef: this.qrRef, qrBigRef: this.qrBigRef, qrBig: !!s.qrBig,
+      openQrBig: ()=>this.setState({qrBig:true}), closeQrBig: ()=>this.setState({qrBig:false}),
       name: s.name, onName: e=>this.setState({name:e.target.value}),
       start: this.start, restart: s.mode==='team' ? this.backToLobby : this.start,
       toJoin: s.mode==='team' ? this.leaveLobby : ()=>this.setState({screen:'join'}),
@@ -1274,8 +1585,8 @@ class Component extends DCLogic {
       pick0: this.answer(0), pick1: this.answer(1), pick2: this.answer(2), pick3: this.answer(3),
       ring0: ringOf(0), ring1: ringOf(1), ring2: ringOf(2), ring3: ringOf(3),
       dim0: dimOf(0), dim1: dimOf(1), dim2: dimOf(2), dim3: dimOf(3),
-      timeLeft: Math.ceil(s.t/10), timePct: Math.round((s.t/(this.secs*10))*100),
-      timeColor: s.t <= this.secs*3 ? 'oklch(0.62 0.20 25)' : 'oklch(0.78 0.16 55)',
+      timeLeft: Math.ceil(s.t/10), timePct: Math.round((s.t/(this.qSecs*10))*100),
+      timeColor: s.t <= this.qSecs*3 ? 'oklch(0.62 0.20 25)' : 'oklch(0.78 0.16 55)',
       revealed,
       verdict: s.picked===-1 ? 'Zeit abgelaufen' : ok ? ('Richtig · +' + (s.gain||0) + ' Punkte') : 'Leider falsch',
       verdictColor: ok ? 'oklch(0.80 0.15 160)' : 'oklch(0.72 0.17 30)',
